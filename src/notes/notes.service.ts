@@ -91,16 +91,19 @@ export class NotesService {
     }
   }
 
-  async updateNote(filename: string, newContent: string, isPinned?: boolean): Promise<void> {
+  async updateNote(filename: string, content: string, title?: string, isPinned?: boolean): Promise<void> {
     this.validateFilename(filename);
     const filePath = this.getFilePath(filename);
 
     try {
       await fs.access(filePath); // Check if file exists
-      await fs.writeFile(filePath, newContent, 'utf8');
+      await fs.writeFile(filePath, content, 'utf8');
 
       const metadata = await this.getMetadata();
       if (metadata[filename]) {
+        if (title !== undefined) {
+          metadata[filename].title = title;
+        }
         if (isPinned !== undefined) {
           metadata[filename].isPinned = isPinned;
         }

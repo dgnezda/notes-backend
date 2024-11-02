@@ -33,9 +33,10 @@ export class NotesController {
   async updateNote(
     @Param('filename') filename: string,
     @Body('content') content: string,
+    @Body('title') title: string,
     @Body('isPinned') isPinned?: boolean
   ) {
-    await this.notesService.updateNote(filename, content, isPinned);
+    await this.notesService.updateNote(filename, content, title, isPinned);
     return { message: `Note "${filename}" updated successfully.` };
   }
 
