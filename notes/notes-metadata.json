@@ -1,9 +1,4 @@
 {
-  "new-note-1.md": {
-    "isPinned": true,
-    "createdAt": "2024-10-26T10:00:00Z",
-    "title": "note 1"
-  },
   "sample-note.md": {
     "isPinned": false,
     "createdAt": "2024-10-26T11:00:00Z",
@@ -14,9 +9,14 @@
     "createdAt": "2024-10-26T11:00:00Z",
     "title": "note 3"
   },
-  "note_2024-11-02T20-53-23-882Z.md": {
+  "note_2024-11-02T21-20-09-363Z.md": {
+    "isPinned": false,
+    "createdAt": "2024-11-02T21:20:09.379Z",
+    "title": "Tables are funk"
+  },
+  "note_2024-11-02T21-22-46-253Z.md": {
     "isPinned": true,
-    "createdAt": "2024-11-02T20:53:23.899Z",
-    "title": "New Note1"
+    "createdAt": "2024-11-02T21:22:46.269Z",
+    "title": "Markdown basics"
   }
 }
