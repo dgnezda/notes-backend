@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { promises as fs } from 'fs';
 import * as path from 'path';
@@ -6,14 +11,16 @@ import * as path from 'path';
 export interface NoteMetadata {
   isPinned: boolean;
   createdAt: string;
+  modifiedAt: string;
   title: string;
 }
 
 export interface Note {
-  filename: string
-  content: string
-  isPinned: boolean
-  createdAt: string
+  filename: string;
+  content: string;
+  isPinned: boolean;
+  createdAt: string;
+  modifiedAt: string;
 }
 
 @Injectable()
@@ -23,7 +30,8 @@ export class NotesService {
   private readonly logger = new Logger(NotesService.name);
 
   constructor(private configService: ConfigService) {
-    this.notesFolder = this.configService.get<string>('NOTES_FOLDER') || 'notes';
+    this.notesFolder =
+      this.configService.get<string>('NOTES_FOLDER') || 'notes';
     this.metadataPath = path.join(this.notesFolder, 'notes-metadata.json');
   }
 
@@ -34,7 +42,9 @@ export class NotesService {
   private validateFilename(filename: string): void {
     const validFilenameRegex = /^[a-zA-Z0-9-_.]+$/;
     if (!validFilenameRegex.test(filename)) {
-      throw new BadRequestException('Invalid filename. Only alphanumeric characters, hyphens, and underscores are allowed.');
+      throw new BadRequestException(
+        'Invalid filename. Only alphanumeric characters, hyphens, and underscores are allowed.',
+      );
     }
   }
 
@@ -47,11 +57,21 @@ export class NotesService {
     }
   }
 
-  private async saveMetadata(metadata: Record<string, NoteMetadata>): Promise<void> {
-    await fs.writeFile(this.metadataPath, JSON.stringify(metadata, null, 2), 'utf8');
+  private async saveMetadata(
+    metadata: Record<string, NoteMetadata>,
+  ): Promise<void> {
+    await fs.writeFile(
+      this.metadataPath,
+      JSON.stringify(metadata, null, 2),
+      'utf8',
+    );
   }
 
-  async createNote(filename: string, title: string, content: string): Promise<void> {
+  async createNote(
+    filename: string,
+    title: string,
+    content: string,
+  ): Promise<void> {
     this.validateFilename(filename);
     const filePath = this.getFilePath(filename);
 
@@ -59,7 +79,13 @@ export class NotesService {
       await fs.writeFile(filePath, content, 'utf8');
 
       const metadata = await this.getMetadata();
-      metadata[filename] = { isPinned: false, createdAt: new Date().toISOString(), title: title };
+      const timestamp = new Date().toISOString();
+      metadata[filename] = {
+        isPinned: false,
+        createdAt: timestamp,
+        modifiedAt: timestamp,
+        title: title,
+      };
       await this.saveMetadata(metadata);
 
       this.logger.log(`Note created: ${filename}`);
@@ -69,7 +95,9 @@ export class NotesService {
     }
   }
 
-  async readNote(filename: string): Promise<{ content: string; metadata: NoteMetadata }> {
+  async readNote(
+    filename: string,
+  ): Promise<{ content: string; metadata: NoteMetadata }> {
     this.validateFilename(filename);
     const filePath = this.getFilePath(filename);
 
@@ -78,20 +106,29 @@ export class NotesService {
       const metadata = await this.getMetadata();
 
       if (!metadata[filename]) {
-        throw new NotFoundException(`Metadata for note "${filename}" not found`);
+        throw new NotFoundException(
+          `Metadata for note "${filename}" not found`,
+        );
       }
 
       this.logger.log(`Note read: ${filename}`);
       return { content, metadata: metadata[filename] };
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new NotFoundException(`Note with filename "${filename}" not found`);
+        throw new NotFoundException(
+          `Note with filename "${filename}" not found`,
+        );
       }
       throw error;
     }
   }
 
-  async updateNote(filename: string, content: string, title?: string, isPinned?: boolean): Promise<void> {
+  async updateNote(
+    filename: string,
+    content: string,
+    title?: string,
+    isPinned?: boolean,
+  ): Promise<void> {
     this.validateFilename(filename);
     const filePath = this.getFilePath(filename);
 
@@ -107,13 +144,16 @@ export class NotesService {
         if (isPinned !== undefined) {
           metadata[filename].isPinned = isPinned;
         }
+        metadata[filename].modifiedAt = new Date().toISOString();
         await this.saveMetadata(metadata);
       }
 
       this.logger.log(`Note updated: ${filename}`);
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new NotFoundException(`Note with filename "${filename}" not found`);
+        throw new NotFoundException(
+          `Note with filename "${filename}" not found`,
+        );
       }
       this.logger.error(`Failed to update note: ${filename}`, error.stack);
       throw error;
@@ -134,7 +174,9 @@ export class NotesService {
       this.logger.log(`Note deleted: ${filename}`);
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new NotFoundException(`Note with filename "${filename}" not found`);
+        throw new NotFoundException(
+          `Note with filename "${filename}" not found`,
+        );
       }
       this.logger.error(`Failed to delete note: ${filename}`, error.stack);
       throw error;
@@ -147,16 +189,26 @@ export class NotesService {
 
     return Promise.all(
       files
-        .filter(file => file.endsWith('.md'))
-        .map(async file => {
+        .filter((file) => file.endsWith('.md'))
+        .map(async (file) => {
           // const filename = file.replace('.md', '');
           const meta = metadata[file];
-          const content = await fs.readFile(`${this.notesFolder}/${file}`, 'utf-8'); // Read file content
+          const content = await fs.readFile(
+            `${this.notesFolder}/${file}`,
+            'utf-8',
+          ); // Read file content
 
-          return { filename: file, title: meta.title, content, isPinned: meta.isPinned, createdAt: meta.createdAt };
-        })
+          return {
+            filename: file,
+            title: meta.title,
+            content,
+            isPinned: meta.isPinned,
+            createdAt: meta.createdAt,
+            modifiedAt: meta.modifiedAt,
+          };
+        }),
     );
-}
+  }
 
   async pinNote(filename: string, pin: boolean): Promise<void> {
     this.validateFilename(filename);
