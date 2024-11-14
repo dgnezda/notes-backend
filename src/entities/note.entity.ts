@@ -1,11 +1,9 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne } from "typeorm";
 import { Base } from "./base.entity";
+import { User } from "./user.entity";
 
 @Entity()
 export class Note extends Base {
-  @Column({ unique: true })
-  filename: string;
-
   @Column()
   title: string;
 
@@ -15,6 +13,6 @@ export class Note extends Base {
   @Column({ default: false })
   isPinned: boolean;
 
-  // @Column()
-  // images?: string[];
+  @ManyToOne(() => User, (user) => user.notes)
+  user: User;
 }
