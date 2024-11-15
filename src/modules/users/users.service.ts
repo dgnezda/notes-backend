@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { error } from 'console'
-import { User } from 'src/entities/user.entity'
+import { User } from 'entities/user.entity'
 import { PostgresErrorCode } from '../../helpers/postgres-error-code.enum'
 import { AbstractService } from '../abstract.service'
 import { Repository } from 'typeorm'
@@ -12,9 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UsersService extends AbstractService {
-  constructor(
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
-  ) {
+  constructor(@InjectRepository(User) private readonly usersRepository: Repository<User>) {
     super(usersRepository)
   }
   logger: Logger = new Logger()
@@ -36,12 +34,12 @@ export class UsersService extends AbstractService {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = (await this.findById(id)) as User
-    const { email, password, confirm_password, ...data } = updateUserDto // role_id
+    const { email, password, confirmPassword, ...data } = updateUserDto // role_id
     if (user.email !== email && email) {
       user.email = email
     }
-    if (password && confirm_password) {
-      if (password !== confirm_password) {
+    if (password && confirmPassword) {
+      if (password !== confirmPassword) {
         throw new BadRequestException('Passwords do not match')
       }
       if (await compareHash(password, user.password)) {

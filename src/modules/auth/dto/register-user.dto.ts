@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsNotEmpty, IsOptional, Matches } from 'class-validator'
-import { Match } from 'src/decorators/match.decorator'
+import { Match } from 'decorators/match.decorator'
 
 export class RegisterUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
-  first_name?: string
+  firstName?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
-  last_name?: string
+  lastName?: string
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
@@ -27,5 +27,5 @@ export class RegisterUserDto {
   @ApiProperty({ required: true })
   @IsNotEmpty()
   @Match(RegisterUserDto, (field) => field.password, { message: 'Passwords do not match.' })
-  confirm_password: string
+  confirmPassword: string
 }

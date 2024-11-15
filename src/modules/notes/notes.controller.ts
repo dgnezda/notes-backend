@@ -1,57 +1,41 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Patch } from '@nestjs/common';
-import { NotesService } from './notes.service';
+import { Body, Controller, Delete, Get, Param, Post, Put, Patch } from '@nestjs/common'
+import { NotesService } from './notes.service'
+import { Note } from 'entities/note.entity'
+import { create } from 'domain'
+import { CreateNoteDto } from './dto/create-note.dto'
+import { UpdateNoteDto } from './dto/update-note.dto'
 
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
   @Get()
-  async listNotes() {
-    return this.notesService.listNotes();
+  async listNotes(): Promise<Note[]> {
+    return this.notesService.listNotes()
   }
 
-  @Get(':filename')
-  async readNote(@Param('filename') filename: string) {
-    return this.notesService.readNote(filename);
+  @Get(':id')
+  async readNote(@Param('id') id: string): Promise<Note> {
+    return this.notesService.readNote(id)
   }
 
   @Post()
-  async createNote(
-    @Body('filename') filename: string,
-    @Body('title') title: string,
-    @Body('content') content: string,
-    @Body('isPinned') isPinned: boolean = false
-  ) {
-    await this.notesService.createNote(filename, title, content);
-    if (isPinned) {
-      await this.notesService.pinNote(filename, true); // Set the initial pin state if specified
-    }
-    return { message: `Note "${filename}" created successfully.` };
+  async createNote(@Body() { title, content, userId, isPinned }: CreateNoteDto): Promise<Note> {
+    return this.notesService.createNote(title, content, userId, isPinned)
   }
 
-  @Put(':filename')
-  async updateNote(
-    @Param('filename') filename: string,
-    @Body('content') content: string,
-    @Body('title') title: string,
-    @Body('isPinned') isPinned?: boolean
-  ) {
-    await this.notesService.updateNote(filename, content, title, isPinned);
-    return { message: `Note "${filename}" updated successfully.` };
+  @Put(':id')
+  async updateNote(@Param('id') id: string, @Body() { title, content, isPinned }: UpdateNoteDto): Promise<Note> {
+    return this.notesService.updateNote(id, title, content, isPinned)
   }
 
-  @Patch(':filename/pin')
-  async pinNote(
-    @Param('filename') filename: string,
-    @Body('isPinned') isPinned: boolean
-  ) {
-    await this.notesService.pinNote(filename, isPinned);
-    return { message: `Note "${filename}" ${isPinned ? 'pinned' : 'unpinned'} successfully.` };
+  @Patch(':id/pin')
+  async pinNote(@Param('id') id: string, @Body('isPinned') isPinned: boolean): Promise<Note> {
+    return this.notesService.pinNote(id, isPinned)
   }
 
-  @Delete(':filename')
-  async deleteNote(@Param('filename') filename: string) {
-    await this.notesService.deleteNote(filename);
-    return { message: `Note "${filename}" deleted successfully.` };
+  @Delete(':id')
+  async deleteNote(@Param('id') id: string): Promise<void> {
+    return this.notesService.deleteNote(id)
   }
 }

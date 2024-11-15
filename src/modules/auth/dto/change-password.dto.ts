@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsNotEmpty, Matches } from 'class-validator'
-import { Match } from 'src/decorators/match.decorator'
+import { Match } from 'decorators/match.decorator'
 import { RegisterUserDto } from './register-user.dto'
 
 export class ChangePasswordDto {
   @ApiProperty({ required: true })
   @IsNotEmpty()
-  old_password: string
+  oldPassword: string
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
@@ -14,10 +14,10 @@ export class ChangePasswordDto {
     message:
       'Password must have at least one number, lower or uppercase letter, and it has to be 6 characters or longer.',
   })
-  new_password: string
+  newPassword: string
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
   @Match(RegisterUserDto, (field) => field.password, { message: 'Passwords do not match.' })
-  confirm_password: string
+  confirmPassword: string
 }

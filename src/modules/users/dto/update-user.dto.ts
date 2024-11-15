@@ -1,24 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsOptional, Matches, ValidateIf } from 'class-validator'
-import { Match } from 'src/decorators/match.decorator'
+import { Match } from 'decorators/match.decorator'
 
 export class UpdateUserDto {
   @ApiProperty({ required: false })
   @IsOptional()
-  first_name?: string
+  firstName?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
-  last_name?: string
+  lastName?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsEmail()
   email?: string
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  role_id?: string
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -37,5 +33,5 @@ export class UpdateUserDto {
   @ValidateIf((o) => typeof o.confirm_password === 'string' && o.confirm_password.length > 0)
   @IsOptional()
   @Match(UpdateUserDto, (field) => field.password, { message: 'Passwords do not match.' })
-  confirm_password?: string
+  confirmPassword?: string
 }

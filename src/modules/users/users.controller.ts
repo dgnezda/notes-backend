@@ -16,7 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { User } from 'src/entities/user.entity'
+import { User } from 'entities/user.entity'
 import { isFileExtensionSafe, removeFile, saveImageToStorage } from '../../helpers/image-storage'
 import { PaginatedResult } from '../../interfaces/paginated-result.interface'
 import { join } from 'path'
@@ -24,17 +24,15 @@ import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiTags } fro
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UsersService } from './users.service'
-import { GetUser } from 'src/decorators/get-user.decorator'
+import { GetUser } from 'decorators/get-user.decorator'
 import { JwtAuthGuard } from '../auth/guards/jwt.guard'
-import { GetUserId } from 'src/decorators/get-user-id.decorator'
+import { GetUserId } from 'decorators/get-user-id.decorator'
 
 @ApiTags('users')
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @ApiCreatedResponse({ description: 'List all users.' })
   @ApiBadRequestResponse({ description: 'Error for list of users.' })
@@ -60,10 +58,12 @@ export class UsersController {
   }
 
   @Post('upload/:id')
-  @UseInterceptors(FileInterceptor('avatar', {
-    storage: saveImageToStorage,
-    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
-  }))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: saveImageToStorage,
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+    }),
+  )
   @HttpCode(HttpStatus.CREATED)
   async upload(@UploadedFile() file: Express.Multer.File, @Param('id') id: string): Promise<User> {
     const filename = file?.filename
@@ -90,5 +90,4 @@ export class UsersController {
   async remove(@Param('id') id: string): Promise<User> {
     return this.usersService.remove(id)
   }
-
 }

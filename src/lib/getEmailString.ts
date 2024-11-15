@@ -88,7 +88,7 @@ export default function getEmailString(restLink: string): string {
                   <p>If you did not request this, please ignore this email. Your password will remain unchanged, and no further action is required.</p>
               </div>
               <div class="footer">
-                  <p>Thank you for using our service!</p>
+                  <p>Thank you for using .md notes!</p>
               </div>
           </div>
       </body>

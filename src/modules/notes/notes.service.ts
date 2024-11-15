@@ -1,226 +1,97 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-
-export interface NoteMetadata {
-  isPinned: boolean;
-  createdAt: string;
-  modifiedAt: string;
-  title: string;
-}
-
-export interface Note {
-  filename: string;
-  content: string;
-  isPinned: boolean;
-  createdAt: string;
-  modifiedAt: string;
-}
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
+import { Repository } from 'typeorm'
+import { Note } from 'entities/note.entity'
+import { User } from 'entities/user.entity'
+import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class NotesService {
-  private notesFolder: string;
-  private metadataPath: string;
-  private readonly logger = new Logger(NotesService.name);
+  private readonly logger = new Logger(NotesService.name)
 
-  constructor(private configService: ConfigService) {
-    this.notesFolder =
-      this.configService.get<string>('NOTES_FOLDER') || 'notes';
-    this.metadataPath = path.join(this.notesFolder, 'notes-metadata.json');
-  }
-
-  private getFilePath(filename: string): string {
-    return path.join(this.notesFolder, `${filename}`);
-  }
+  constructor(
+    @InjectRepository(Note)
+    private noteRepository: Repository<Note>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
   private validateFilename(filename: string): void {
-    const validFilenameRegex = /^[a-zA-Z0-9-_.]+$/;
+    const validFilenameRegex = /^[a-zA-Z0-9-_.]+$/
     if (!validFilenameRegex.test(filename)) {
       throw new BadRequestException(
         'Invalid filename. Only alphanumeric characters, hyphens, and underscores are allowed.',
-      );
+      )
     }
   }
 
-  private async getMetadata(): Promise<Record<string, NoteMetadata>> {
-    try {
-      const data = await fs.readFile(this.metadataPath, 'utf8');
-      return JSON.parse(data);
-    } catch {
-      return {}; // Return empty metadata if file doesn't exist or can't be read
+  async createNote(title: string, content: string, userId: string, isPinned: boolean = false): Promise<Note> {
+    const user = await this.userRepository.findOne({ where: { id: userId } })
+    if (!user) {
+      throw new NotFoundException(`User with ID "${userId}" not found`)
     }
+
+    const note = this.noteRepository.create({
+      title,
+      content,
+      isPinned,
+      user,
+    })
+
+    await this.noteRepository.save(note)
+    this.logger.log(`Note created: ${note.id}`)
+    return note
   }
 
-  private async saveMetadata(
-    metadata: Record<string, NoteMetadata>,
-  ): Promise<void> {
-    await fs.writeFile(
-      this.metadataPath,
-      JSON.stringify(metadata, null, 2),
-      'utf8',
-    );
+  async readNote(id: string): Promise<Note> {
+    const note = await this.noteRepository.findOne({ where: { id }, relations: ['user'] })
+    if (!note) {
+      throw new NotFoundException(`Note with ID "${id}" not found`)
+    }
+
+    this.logger.log(`Note read: ${id}`)
+    return note
   }
 
-  async createNote(
-    filename: string,
-    title: string,
-    content: string,
-  ): Promise<void> {
-    this.validateFilename(filename);
-    const filePath = this.getFilePath(filename);
-
-    try {
-      await fs.writeFile(filePath, content, 'utf8');
-
-      const metadata = await this.getMetadata();
-      const timestamp = new Date().toISOString();
-      metadata[filename] = {
-        isPinned: false,
-        createdAt: timestamp,
-        modifiedAt: timestamp,
-        title: title,
-      };
-      await this.saveMetadata(metadata);
-
-      this.logger.log(`Note created: ${filename}`);
-    } catch (error) {
-      this.logger.error(`Failed to create note: ${filename}`, error.stack);
-      throw error;
+  async updateNote(id: string, title: string, content: string, isPinned?: boolean): Promise<Note> {
+    const note = await this.noteRepository.findOne({ where: { id } })
+    if (!note) {
+      throw new NotFoundException(`Note with ID "${id}" not found`)
     }
+
+    note.title = title
+    note.content = content
+    if (isPinned !== undefined) {
+      note.isPinned = isPinned
+    }
+
+    await this.noteRepository.save(note)
+    this.logger.log(`Note updated: ${id}`)
+    return note
   }
 
-  async readNote(
-    filename: string,
-  ): Promise<{ content: string; metadata: NoteMetadata }> {
-    this.validateFilename(filename);
-    const filePath = this.getFilePath(filename);
-
-    try {
-      const content = await fs.readFile(filePath, 'utf8');
-      const metadata = await this.getMetadata();
-
-      if (!metadata[filename]) {
-        throw new NotFoundException(
-          `Metadata for note "${filename}" not found`,
-        );
-      }
-
-      this.logger.log(`Note read: ${filename}`);
-      return { content, metadata: metadata[filename] };
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        throw new NotFoundException(
-          `Note with filename "${filename}" not found`,
-        );
-      }
-      throw error;
+  async deleteNote(id: string): Promise<void> {
+    const note = await this.noteRepository.findOne({ where: { id } })
+    if (!note) {
+      throw new NotFoundException(`Note with ID "${id}" not found`)
     }
-  }
 
-  async updateNote(
-    filename: string,
-    content: string,
-    title?: string,
-    isPinned?: boolean,
-  ): Promise<void> {
-    this.validateFilename(filename);
-    const filePath = this.getFilePath(filename);
-
-    try {
-      await fs.access(filePath); // Check if file exists
-      await fs.writeFile(filePath, content, 'utf8');
-
-      const metadata = await this.getMetadata();
-      if (metadata[filename]) {
-        if (title !== undefined) {
-          metadata[filename].title = title;
-        }
-        if (isPinned !== undefined) {
-          metadata[filename].isPinned = isPinned;
-        }
-        metadata[filename].modifiedAt = new Date().toISOString();
-        await this.saveMetadata(metadata);
-      }
-
-      this.logger.log(`Note updated: ${filename}`);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        throw new NotFoundException(
-          `Note with filename "${filename}" not found`,
-        );
-      }
-      this.logger.error(`Failed to update note: ${filename}`, error.stack);
-      throw error;
-    }
-  }
-
-  async deleteNote(filename: string): Promise<void> {
-    this.validateFilename(filename);
-    const filePath = this.getFilePath(filename);
-
-    try {
-      await fs.unlink(filePath);
-
-      const metadata = await this.getMetadata();
-      delete metadata[filename];
-      await this.saveMetadata(metadata);
-
-      this.logger.log(`Note deleted: ${filename}`);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        throw new NotFoundException(
-          `Note with filename "${filename}" not found`,
-        );
-      }
-      this.logger.error(`Failed to delete note: ${filename}`, error.stack);
-      throw error;
-    }
+    await this.noteRepository.remove(note)
+    this.logger.log(`Note deleted: ${id}`)
   }
 
   async listNotes(): Promise<Note[]> {
-    const metadata = await this.getMetadata();
-    const files = await fs.readdir(this.notesFolder);
-
-    return Promise.all(
-      files
-        .filter((file) => file.endsWith('.md'))
-        .map(async (file) => {
-          // const filename = file.replace('.md', '');
-          const meta = metadata[file];
-          const content = await fs.readFile(
-            `${this.notesFolder}/${file}`,
-            'utf-8',
-          ); // Read file content
-
-          return {
-            filename: file,
-            title: meta.title,
-            content,
-            isPinned: meta.isPinned,
-            createdAt: meta.createdAt,
-            modifiedAt: meta.modifiedAt,
-          };
-        }),
-    );
+    return this.noteRepository.find({ relations: ['user'] })
   }
 
-  async pinNote(filename: string, pin: boolean): Promise<void> {
-    this.validateFilename(filename);
-
-    const metadata = await this.getMetadata();
-    if (!metadata[filename]) {
-      throw new NotFoundException(`Metadata for note "${filename}" not found`);
+  async pinNote(id: string, pin: boolean): Promise<Note> {
+    const note = await this.noteRepository.findOne({ where: { id } })
+    if (!note) {
+      throw new NotFoundException(`Note with ID "${id}" not found`)
     }
 
-    metadata[filename].isPinned = pin;
-    await this.saveMetadata(metadata);
-
-    this.logger.log(`Note ${pin ? 'pinned' : 'unpinned'}: ${filename}`);
+    note.isPinned = pin
+    await this.noteRepository.save(note)
+    this.logger.log(`Note ${pin ? 'pinned' : 'unpinned'}: ${id}`)
+    return note
   }
 }

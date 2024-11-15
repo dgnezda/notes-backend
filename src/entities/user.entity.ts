@@ -1,7 +1,7 @@
-import { Column, Entity, OneToMany } from "typeorm";
-import { Base } from "./base.entity";
-import { Exclude } from "class-transformer";
-import { Note } from "./note.entity";
+import { Column, Entity, OneToMany } from 'typeorm'
+import { Base } from './base.entity'
+import { Exclude } from 'class-transformer'
+import { Note } from './note.entity'
 
 @Entity()
 export class User extends Base {
@@ -9,10 +9,10 @@ export class User extends Base {
   email: string
 
   @Column({ nullable: true })
-  first_name: string
+  firstName: string
 
   @Column({ nullable: true })
-  last_name: string
+  lastName: string
 
   @Column({ nullable: true })
   avatar: string
