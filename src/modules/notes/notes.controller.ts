@@ -14,6 +14,11 @@ export class NotesController {
     return this.notesService.listNotes()
   }
 
+  @Get('user/:userId')
+  async listNotesByUser(@Param('userId') userId: string): Promise<Note[]> {
+    return this.notesService.listNotesByUser(userId)
+  }
+
   @Get(':id')
   async readNote(@Param('id') id: string): Promise<Note> {
     return this.notesService.readNote(id)

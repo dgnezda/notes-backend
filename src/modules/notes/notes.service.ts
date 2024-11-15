@@ -83,6 +83,10 @@ export class NotesService {
     return this.noteRepository.find({ relations: ['user'] })
   }
 
+  async listNotesByUser(userId: string): Promise<Note[]> {
+    return this.noteRepository.find({ where: { user: { id: userId } }, relations: ['user'] })
+  }
+
   async pinNote(id: string, pin: boolean): Promise<Note> {
     const note = await this.noteRepository.findOne({ where: { id } })
     if (!note) {

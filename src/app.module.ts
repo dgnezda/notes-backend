@@ -12,7 +12,7 @@ import { DatabaseModule } from 'database/database.module'
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`.env.${process.env.ENV}`],
+      envFilePath: [`.env.${process.env.ENV || 'development'}`],
       validationSchema: configValidationSchema,
     }),
     DatabaseModule,

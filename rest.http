@@ -6,6 +6,12 @@ Accept: application/json
 
 ###
 
+# List all notes by user ID
+GET http://localhost:3000/notes/user/737549bd-3f87-496a-9e1e-89101fb76d96
+Accept: application/json
+
+###
+
 # Read a specific note by ID
 GET http://localhost:3000/notes/{{noteId}}
 Accept: application/json
@@ -18,31 +24,31 @@ Content-Type: application/json
 
 {
   "title": "Sample Note",
-  "content": "This is a sample note.",
-  "userId": "{{userId}}",
+  "content": "This is a sample markdown **note** \n# Heading one!.",
+  "userId": "737549bd-3f87-496a-9e1e-89101fb76d96",
   "isPinned": false
 }
 
 ###
 
 # Update a note by ID
-PUT http://localhost:3000/notes/{{noteId}}
+PUT http://localhost:3000/notes/566a4c6d-5fa0-4aa2-afc3-ce533bdb9f4e
 Content-Type: application/json
 
 {
-  "title": "Updated Note",
-  "content": "This is an updated note.",
+  "title": "Sample Note",
+  "content": "This is a sample markdown **note** \n# Heading one!.\n## Heading two!.",
   "isPinned": true
 }
 
 ###
 
 # Pin a note by ID
-PATCH http://localhost:3000/notes/{{noteId}}/pin
+PATCH http://localhost:3000/notes/566a4c6d-5fa0-4aa2-afc3-ce533bdb9f4e/pin
 Content-Type: application/json
 
 {
-  "isPinned": true
+  "isPinned": false
 }
 
 ###
@@ -62,7 +68,7 @@ Accept: application/json
 ###
 
 # Get a specific user by ID
-GET http://localhost:3000/users/{{userId}}
+GET http://localhost:3000/users/737549bd-3f87-496a-9e1e-89101fb76d96
 Accept: application/json
 
 ###
@@ -81,12 +87,12 @@ Content-Type: application/json
 ###
 
 # Update a user by ID
-PATCH http://localhost:3000/users/{{userId}}
+PATCH http://localhost:3000/users/737549bd-3f87-496a-9e1e-89101fb76d96
 Content-Type: application/json
 
 {
-  "firstName": "Jane",
-  "lastName": "Doe"
+  "firstName": "Don",
+  "lastName": "Rock"
 }
 
 ###
@@ -104,10 +110,11 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "password": "Password123!"
+  "firstName": "Don",
+  "lastName": "Rock",
+  "email": "donrockguitar@gmail.com",
+  "password": "qwER12#$",
+  "confirmPassword": "qwER12#$"
 }
 
 ###
@@ -117,8 +124,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "john.doe@example.com",
-  "password": "Password123!"
+  "email": "donrockguitar@gmail.com",
+  "password": "qwER12#$"
 }
 
 ###
