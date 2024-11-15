@@ -1,0 +1,136 @@
+### Notes Endpoints
+
+# List all notes
+GET http://localhost:3000/notes
+Accept: application/json
+
+###
+
+# Read a specific note by ID
+GET http://localhost:3000/notes/{{noteId}}
+Accept: application/json
+
+###
+
+# Create a new note
+POST http://localhost:3000/notes
+Content-Type: application/json
+
+{
+  "title": "Sample Note",
+  "content": "This is a sample note.",
+  "userId": "{{userId}}",
+  "isPinned": false
+}
+
+###
+
+# Update a note by ID
+PUT http://localhost:3000/notes/{{noteId}}
+Content-Type: application/json
+
+{
+  "title": "Updated Note",
+  "content": "This is an updated note.",
+  "isPinned": true
+}
+
+###
+
+# Pin a note by ID
+PATCH http://localhost:3000/notes/{{noteId}}/pin
+Content-Type: application/json
+
+{
+  "isPinned": true
+}
+
+###
+
+# Delete a note by ID
+DELETE http://localhost:3000/notes/{{noteId}}
+Accept: application/json
+
+###
+
+### Users Endpoints
+
+# List all users
+GET http://localhost:3000/users
+Accept: application/json
+
+###
+
+# Get a specific user by ID
+GET http://localhost:3000/users/{{userId}}
+Accept: application/json
+
+###
+
+# Create a new user
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "password": "Password123!"
+}
+
+###
+
+# Update a user by ID
+PATCH http://localhost:3000/users/{{userId}}
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Doe"
+}
+
+###
+
+# Delete a user by ID
+DELETE http://localhost:3000/users/{{userId}}
+Accept: application/json
+
+###
+
+### Auth Endpoints
+
+# Register a new user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "password": "Password123!"
+}
+
+###
+
+# Login a user
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "Password123!"
+}
+
+###
+
+# Get authenticated user
+GET http://localhost:3000/auth
+Accept: application/json
+Cookie: access_token={{accessToken}}
+
+###
+
+# Sign out user
+POST http://localhost:3000/auth/signout
+Accept: application/json
+Cookie: access_token={{accessToken}}
