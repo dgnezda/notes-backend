@@ -7,7 +7,7 @@ export class Note extends Base {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'text', nullable: false })
   content: string;
 
   @Column({ default: false })
