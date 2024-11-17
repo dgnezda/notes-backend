@@ -4,7 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import * as passport from 'passport';
+import passport from 'passport';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

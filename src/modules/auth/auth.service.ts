@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { User } from 'entities/user.entity'
 import { UsersService } from '../users/users.service'
@@ -18,14 +18,14 @@ export class AuthService {
     this.logger.log('Validating user...')
     const user = await this.usersService.findBy({ email: email })
     if (!user) {
-      throw new BadRequestException('Invalid credentials')
+      throw new UnauthorizedException('Invalid credentials');
     }
-    if (!(await compareHash(password, user.password))) {
-      throw new BadRequestException('Invalid credentials')
+    const isPasswordValid = await compareHash(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
     }
-
-    this.logger.log('User is valid.')
-    return user
+    this.logger.log('User validated successfully');
+    return user;
   }
 
   async register(registerUserDto: RegisterUserDto): Promise<User> {
@@ -38,7 +38,9 @@ export class AuthService {
   }
 
   async generateJwt(user: User): Promise<string> {
-    return this.jwtService.signAsync({ sub: user.id, name: user.email })
+    // return this.jwtService.signAsync({ sub: user.id, name: user.email })
+    const payload = { id: user.id, email: user.email };
+    return this.jwtService.signAsync(payload);
   }
 
   async user(cookie: string): Promise<User> {
@@ -54,4 +56,5 @@ export class AuthService {
   async validateUserById(id: string): Promise<User> {
     return this.usersService.findById(id);
   }
+  
 }

@@ -14,19 +14,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
   imports: [
     ConfigModule, // Import ConfigModule here
     UsersModule,
-    PassportModule,
-    // JwtModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     global: true,
-    //     secret: configService.get<string>('JWT_SECRET'),
-    //     signOptions: { expiresIn: `${configService.get<string>('JWT_SECRET_EXPIRES')}s` },
-    //   }),
-    //   inject: [ConfigService],
-    // }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '3600s' },
+    // PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        global: true,
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: `${configService.get<string>('JWT_SECRET_EXPIRES')}s` },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
@@ -34,10 +31,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
     AuthService,
     LocalStrategy,
     JwtStrategy,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
   ],
   exports: [AuthService],
 })
