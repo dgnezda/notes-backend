@@ -15,15 +15,6 @@ export class NotesService {
     private userRepository: Repository<User>,
   ) {}
 
-  private validateFilename(filename: string): void {
-    const validFilenameRegex = /^[a-zA-Z0-9-_.]+$/
-    if (!validFilenameRegex.test(filename)) {
-      throw new BadRequestException(
-        'Invalid filename. Only alphanumeric characters, hyphens, and underscores are allowed.',
-      )
-    }
-  }
-  
   async listNotes(userId: string): Promise<Note[]> {
     return this.noteRepository.find({
       where: { user: { id: userId } },
@@ -95,10 +86,6 @@ export class NotesService {
     await this.noteRepository.remove(note);
     this.logger.log(`Note deleted: ${id}`);
   }
-
-  // async listNotesByUser(userId: string): Promise<Note[]> {
-  //   return this.noteRepository.find({ where: { user: { id: userId } }, relations: ['user'] })
-  // }
 
   async pinNote(id: string, isPinned: boolean, userId: string): Promise<Note> {
     const note = await this.noteRepository.findOne({
