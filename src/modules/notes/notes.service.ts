@@ -23,6 +23,13 @@ export class NotesService {
       )
     }
   }
+  
+  async listNotes(userId: string): Promise<Note[]> {
+    return this.noteRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
+  }
 
   async createNote(title: string, content: string, userId: string, isPinned: boolean = false): Promise<Note> {
     const user = await this.userRepository.findOne({ where: { id: userId } })
@@ -42,60 +49,68 @@ export class NotesService {
     return note
   }
 
-  async readNote(id: string): Promise<Note> {
-    const note = await this.noteRepository.findOne({ where: { id }, relations: ['user'] })
+  async readNote(id: string, userId: string): Promise<Note> {
+    const note = await this.noteRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`)
+      throw new NotFoundException(`Note not found`);
     }
-
-    this.logger.log(`Note read: ${id}`)
-    return note
+    return note;
   }
 
-  async updateNote(id: string, title: string, content: string, isPinned?: boolean): Promise<Note> {
-    const note = await this.noteRepository.findOne({ where: { id } })
+  async updateNote(
+    id: string,
+    title: string,
+    content: string,
+    isPinned: boolean | undefined,
+    userId: string
+  ): Promise<Note> {
+    const note = await this.noteRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`)
+      throw new NotFoundException(`Note with ID "${id}" not found`);
     }
 
-    note.title = title
-    note.content = content
+    note.title = title;
+    note.content = content;
     if (isPinned !== undefined) {
-      note.isPinned = isPinned
+      note.isPinned = isPinned;
     }
 
-    await this.noteRepository.save(note)
-    this.logger.log(`Note updated: ${id}`)
-    return note
+    await this.noteRepository.save(note);
+    this.logger.log(`Note updated: ${id}`);
+    return note;
   }
 
-  async deleteNote(id: string): Promise<void> {
-    const note = await this.noteRepository.findOne({ where: { id } })
+  async deleteNote(id: string, userId: string): Promise<void> {
+    const note = await this.noteRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`)
+      throw new NotFoundException(`Note with ID "${id}" not found`);
     }
 
-    await this.noteRepository.remove(note)
-    this.logger.log(`Note deleted: ${id}`)
+    await this.noteRepository.remove(note);
+    this.logger.log(`Note deleted: ${id}`);
   }
 
-  async listNotes(): Promise<Note[]> {
-    return this.noteRepository.find({ relations: ['user'] })
-  }
+  // async listNotesByUser(userId: string): Promise<Note[]> {
+  //   return this.noteRepository.find({ where: { user: { id: userId } }, relations: ['user'] })
+  // }
 
-  async listNotesByUser(userId: string): Promise<Note[]> {
-    return this.noteRepository.find({ where: { user: { id: userId } }, relations: ['user'] })
-  }
-
-  async pinNote(id: string, pin: boolean): Promise<Note> {
-    const note = await this.noteRepository.findOne({ where: { id } })
+  async pinNote(id: string, isPinned: boolean, userId: string): Promise<Note> {
+    const note = await this.noteRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`)
+      throw new NotFoundException(`Note with ID "${id}" not found`);
     }
 
-    note.isPinned = pin
-    await this.noteRepository.save(note)
-    this.logger.log(`Note ${pin ? 'pinned' : 'unpinned'}: ${id}`)
-    return note
+    note.isPinned = isPinned;
+    await this.noteRepository.save(note);
+    this.logger.log(`Note ${isPinned ? 'pinned' : 'unpinned'}: ${id}`);
+    return note;
   }
 }

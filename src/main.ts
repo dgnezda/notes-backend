@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import * as passport from 'passport';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -19,6 +20,7 @@ async function bootstrap() {
   })
   app.useGlobalPipes(new ValidationPipe())
   app.use(cookieParser())
+  app.use(passport.initialize());
   // Setup to display files
   app.use('/files', express.static('files'))
 

@@ -13,11 +13,6 @@ export class CreateNoteDto {
   @IsString()
   content: string
 
-  @ApiProperty({ required: true })
-  @IsNotEmpty()
-  @IsString()
-  userId: string
-
   @ApiProperty({ required: false, default: false })
   @IsNotEmpty()
   @IsBoolean()

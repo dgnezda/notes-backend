@@ -50,4 +50,8 @@ export class AuthService {
     const user = request.user as User
     return user.id
   }
+
+  async validateUserById(id: string): Promise<User> {
+    return this.usersService.findById(id);
+  }
 }

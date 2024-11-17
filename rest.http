@@ -23,9 +23,9 @@ POST http://localhost:3000/notes
 Content-Type: application/json
 
 {
-  "title": "Sample Note",
-  "content": "This is a sample markdown **note** \n# Heading one!.",
-  "userId": "737549bd-3f87-496a-9e1e-89101fb76d96",
+  "title": "Sample Note 2",
+  "content": "This is a sample markdown **note** \n# By user Bon Flock!.",
+  "userId": "fa8418f7-095f-4ef6-b8c6-6aee17513e63",
   "isPinned": false
 }
 
@@ -110,12 +110,20 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "firstName": "Don",
-  "lastName": "Rock",
-  "email": "donrockguitar@gmail.com",
+  "firstName": "Bon",
+  "lastName": "Flock",
+  "email": "bonflock@gmail.com",
   "password": "qwER12#$",
   "confirmPassword": "qwER12#$"
 }
+
+// {
+//   "firstName": "Don",
+//   "lastName": "Rock",
+//   "email": "donrockguitar@gmail.com",
+//   "password": "qwER12#$",
+//   "confirmPassword": "qwER12#$"
+// }
 
 ###
 
@@ -124,9 +132,14 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "donrockguitar@gmail.com",
+  "email": "bonflock@gmail.com",
   "password": "qwER12#$"
 }
+
+// {
+//   "email": "donrockguitar@gmail.com",
+//   "password": "qwER12#$"
+// }
 
 ###
 
