@@ -9,16 +9,22 @@ import { compareHash, hash } from '../../lib/bcrypt'
 
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import getWelcomeNote from 'lib/getWelcomeNote'
+import { Note } from 'entities/note.entity'
+import { NotesService } from 'modules/notes/notes.service'
 
 @Injectable()
 export class UsersService extends AbstractService {
-  constructor(@InjectRepository(User) private readonly usersRepository: Repository<User>) {
+  constructor(
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    private readonly notesService: NotesService,
+  ) {
     super(usersRepository)
   }
   logger: Logger = new Logger()
 
   async findBy(criteria: Partial<User>): Promise<User> {
-    return this.usersRepository.findOne({ where: criteria });
+    return this.usersRepository.findOne({ where: criteria })
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -29,7 +35,15 @@ export class UsersService extends AbstractService {
     try {
       const newUser = this.usersRepository.create({ ...createUserDto }) // role: { id: createUserDto.role_id }
       newUser.notes = []
-      return this.usersRepository.save(newUser)
+      const savedUser = await this.usersRepository.save(newUser)
+      const welcomeNoteContent: string = getWelcomeNote()
+      await this.notesService.createNote(
+        'Welcome to md notes!',
+        welcomeNoteContent,
+        savedUser.id, // Use the saved user's ID
+        true, // isPinned
+      )
+      return savedUser
     } catch (err) {
       this.logger.error(error)
       throw new BadRequestException('Something went wrong while creating a new user.')
