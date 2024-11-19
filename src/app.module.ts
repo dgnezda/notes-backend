@@ -7,6 +7,9 @@ import { configValidationSchema } from './config/schema.config'
 import { LoggerMiddleware } from './middleware/logger.middleware'
 import { EmailModule } from './modules/email/email.module'
 import { DatabaseModule } from 'database/database.module'
+import { FoldersModule } from './modules/folders/folders.module';
+import { GroupsModule } from './modules/groups/groups.module';
+import { FolderPermissionsModule } from './modules/folder-permissions/folder-permissions.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { DatabaseModule } from 'database/database.module'
     AuthModule,
     UsersModule,
     EmailModule,
+    FoldersModule,
+    GroupsModule,
+    FolderPermissionsModule,
   ],
   controllers: [],
   providers: [],

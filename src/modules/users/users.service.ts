@@ -35,6 +35,7 @@ export class UsersService extends AbstractService {
     try {
       const newUser = this.usersRepository.create({ ...createUserDto }) // role: { id: createUserDto.role_id }
       newUser.notes = []
+      newUser.groups = []
       const savedUser = await this.usersRepository.save(newUser)
       const welcomeNoteContent: string = getWelcomeNote()
       await this.notesService.createNote(

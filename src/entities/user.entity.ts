@@ -1,7 +1,10 @@
-import { Column, Entity, OneToMany } from 'typeorm'
+import { Column, Entity, ManyToMany, OneToMany } from 'typeorm'
 import { Base } from './base.entity'
 import { Exclude } from 'class-transformer'
 import { Note } from './note.entity'
+import { Group } from './group.entity'
+import { Folder } from './folder.entity'
+import { FolderPermission } from './folder-permission.entity'
 
 @Entity()
 export class User extends Base {
@@ -21,6 +24,18 @@ export class User extends Base {
   @Exclude()
   password: string
 
-  @OneToMany(() => Note, (note) => note.user)
+  @OneToMany(() => Note, (note) => note.user, { nullable: true })
   notes: Note[]
+
+  @ManyToMany(() => Group, (group) => group.users, { nullable: true })
+  groups: Group[]
+
+  @OneToMany(() => Folder, (folder) => folder.user, { nullable: true })
+  folders: Folder[]
+
+  @OneToMany(() => Group, (group) => group.admin, { nullable: true })
+  adminOfGroups: Group[]
+
+  @OneToMany(() => FolderPermission, (fp) => fp.user)
+  folderPermissions: FolderPermission[]
 }
