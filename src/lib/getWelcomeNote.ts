@@ -18,6 +18,8 @@ Keyboard shortcuts for common tasks:
 - \`Ctrl + Alt + M\`: Export as .md
 - \`Ctrl + Alt + U\`: Toggle pin/unpin selected note
 
+Note: Replace Ctrl + Alt with \`Ctrl + Optio\` on **macOS**!  
+
 You can use most common markdown styling annotations, such as:
 
 - headings

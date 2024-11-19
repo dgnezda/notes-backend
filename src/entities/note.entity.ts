@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm'
+import { Column, Entity, ManyToOne } from 'typeorm'
 import { Base } from './base.entity'
 import { User } from './user.entity'
 import { Folder } from './folder.entity'
