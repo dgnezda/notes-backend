@@ -1,34 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { FolderPermissionsService } from './folder-permissions.service';
-import { CreateFolderPermissionDto } from './dto/create-folder-permission.dto';
-import { UpdateFolderPermissionDto } from './dto/update-folder-permission.dto';
+import { Controller, Patch, Param, Body, Delete, UseGuards } from '@nestjs/common'
+import { FolderPermissionsService } from './folder-permissions.service'
+import { UpdatePermissionDto } from './dto/update-permission.dto'
+import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
 
 @Controller('folder-permissions')
+@UseGuards(JwtAuthGuard)
 export class FolderPermissionsController {
   constructor(private readonly folderPermissionsService: FolderPermissionsService) {}
 
-  @Post()
-  create(@Body() createFolderPermissionDto: CreateFolderPermissionDto) {
-    return this.folderPermissionsService.create(createFolderPermissionDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.folderPermissionsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.folderPermissionsService.findOne(+id);
-  }
-
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFolderPermissionDto: UpdateFolderPermissionDto) {
-    return this.folderPermissionsService.update(+id, updateFolderPermissionDto);
+  update(@Param('id') permissionId: string, @Body() updatePermissionDto: UpdatePermissionDto) {
+    return this.folderPermissionsService.updatePermissions(permissionId, updatePermissionDto)
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.folderPermissionsService.remove(+id);
+  remove(@Param('id') permissionId: string) {
+    return this.folderPermissionsService.remove(permissionId)
   }
 }

@@ -1,53 +1,111 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { UserFolder } from 'entities/user-folder.entity'
+import { User } from 'entities/user.entity'
+import { Repository } from 'typeorm'
 import { CreateFolderDto } from './dto/create-folder.dto'
 import { UpdateFolderDto } from './dto/update-folder.dto'
+import { FolderPermission } from 'entities/folder-permission.entity'
+import { ShareFolderDto } from './dto/share-folder.dto'
+import { PermissionsEnum } from 'enums/permissions.enum'
 
 @Injectable()
 export class FoldersService {
-  // constructor(
-  //   @InjectRepository(Folder)
-  //   private readonly folderRepository: Repository<Folder>,
-  //   @InjectRepository(FolderPermission)
-  //   private readonly folderPermissionRepository: Repository<FolderPermission>,
-  //   @InjectRepository(User)
-  //   private readonly userRepository: Repository<User>,
-  // ) {}
+  constructor(
+    @InjectRepository(UserFolder)
+    private readonly folderRepository: Repository<UserFolder>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(FolderPermission)
+    private readonly folderPermissionRepository: Repository<FolderPermission>,
+  ) {}
 
-  // async createFolder(createFolderDto: CreateFolderDto, userId: string): Promise<Folder> {
-  //   const user = await this.userRepository.findOne(userId);
-  //   const folder = this.folderRepository.create({
-  //     name: createFolderDto.name,
-  //     user,
-  //   });
-  //   await this.folderRepository.save(folder);
+  async createFolder(createFolderDto: CreateFolderDto, userId: string): Promise<UserFolder> {
+    const user = await this.userRepository.findOne({ where: { id: userId } })
+    if (!user) {
+      throw new NotFoundException(`User not found`)
+    }
 
-  //   // Assign full permissions to the creator
-  //   const folderPermission = this.folderPermissionRepository.create({
-  //     folder,
-  //     user,
-  //     permissions: Object.values(Permission),
-  //   });
-  //   await this.folderPermissionRepository.save(folderPermission);
+    const folder = this.folderRepository.create({
+      name: createFolderDto.name,
+      user: { id: userId },
+    })
 
-  //   return folder;
-  // }
-  create(createFolderDto: CreateFolderDto) {
-    return 'This action adds a new folder'
+    const savedFolder = await this.folderRepository.save(folder)
+
+    // Assign full permissions to the creator
+    const folderPermission = this.folderPermissionRepository.create({
+      folder: savedFolder,
+      user: user,
+      permissions: PermissionsEnum.ALL, // Assuming ALL represents full permissions
+    })
+    await this.folderPermissionRepository.save(folderPermission)
+
+    return savedFolder
   }
 
-  findAll() {
-    return `This action returns all folders`
+  async findAll(userId: string): Promise<UserFolder[]> {
+    return this.folderRepository.find({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} folder`
+  async findOne(id: string, userId: string): Promise<UserFolder> {
+    const folder = await this.folderRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    })
+    if (!folder) {
+      throw new NotFoundException(`Folder not found`)
+    }
+    if (folder.user.id !== userId) {
+      throw new ForbiddenException(`You do not have access to this folder`)
+    }
+    return folder
   }
 
-  update(id: number, updateFolderDto: UpdateFolderDto) {
-    return `This action updates a #${id} folder`
+  async update(id: string, userId: string, updateFolderDto: UpdateFolderDto): Promise<UserFolder> {
+    const folder = await this.findOne(id, userId)
+
+    Object.assign(folder, updateFolderDto)
+
+    return this.folderRepository.save(folder)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} folder`
+  async remove(folderId: string, userId: string): Promise<void> {
+    const folder = await this.findOne(folderId, userId)
+    await this.folderRepository.remove(folder)
+  }
+
+  async shareFolder(folderId: string, userId: string, shareFolderDto: ShareFolderDto): Promise<void> {
+    const folder = await this.findOne(folderId, userId)
+
+    const recipient = await this.userRepository.findOne({
+      where: { email: shareFolderDto.email },
+    })
+    if (!recipient) {
+      throw new NotFoundException(`User with email ${shareFolderDto.email} not found`)
+    }
+
+    // Check if the recipient already has permissions
+    const existingPermission = await this.folderPermissionRepository.findOne({
+      where: { folder, user: recipient },
+    })
+    if (existingPermission) {
+      throw new BadRequestException(`User already has permissions for this folder`)
+    }
+
+    const permissionsValue = shareFolderDto.permissions.reduce((acc, perm) => acc | perm, 0)
+
+    const folderPermission = this.folderPermissionRepository.create({
+      folder,
+      user: recipient,
+      permissions: permissionsValue,
+    })
+
+    await this.folderPermissionRepository.save(folderPermission)
+
+    // Optionally, send an email notification to the recipient
   }
 }

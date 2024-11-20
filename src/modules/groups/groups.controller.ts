@@ -1,34 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { GroupsService } from './groups.service';
-import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
+import { Controller, Post, Body, Param, UseGuards, Get } from '@nestjs/common'
+import { GroupsService } from './groups.service'
+import { CreateGroupDto } from './dto/create-group.dto'
+import { GetUserId } from 'decorators/get-user-id.decorator'
+import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
+import { AddUserToGroupDto } from './dto/add-user-to-group.dto'
+import { AssignFolderToGroupDto } from './dto/assign-folder-to-group.dto'
 
 @Controller('groups')
+@UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
-  create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupsService.create(createGroupDto);
+  create(@Body() createGroupDto: CreateGroupDto, @GetUserId() adminId: string) {
+    return this.groupsService.createGroup(createGroupDto, adminId)
   }
 
-  @Get()
-  findAll() {
-    return this.groupsService.findAll();
+  @Post(':id/users')
+  addUser(@Param('id') groupId: string, @Body() addUserDto: AddUserToGroupDto, @GetUserId() adminId: string) {
+    return this.groupsService.addUserToGroup(groupId, adminId, addUserDto)
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupsService.update(+id, updateGroupDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupsService.remove(+id);
+  @Post(':id/folders')
+  assignFolder(
+    @Param('id') groupId: string,
+    @Body() assignFolderDto: AssignFolderToGroupDto,
+    @GetUserId() adminId: string,
+  ) {
+    return this.groupsService.assignFolderToGroup(groupId, adminId, assignFolderDto)
   }
 }
