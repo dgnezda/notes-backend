@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, TableInheritance } from 'typeorm'
+import { Entity, Column, OneToMany, TableInheritance } from 'typeorm'
 import { Note } from './note.entity'
 import { Base } from './base.entity'
 
