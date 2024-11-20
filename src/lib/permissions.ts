@@ -1,6 +1,10 @@
 import { PermissionsEnum } from 'enums/permissions.enum'
 import { AbstractPermissions } from './abstract.permissions'
 
+export function hasPermission(userPermissions, permission) {
+  return (userPermissions & permission) !== 0
+}
+
 export class ViewPermissions extends AbstractPermissions {
   get canViewDocuments() {
     return this.hasPerms(PermissionsEnum.VIEW_NOTES)
