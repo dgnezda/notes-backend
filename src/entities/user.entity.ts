@@ -1,10 +1,11 @@
-import { Column, Entity, ManyToMany, OneToMany } from 'typeorm'
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm'
 import { Base } from './base.entity'
 import { Exclude } from 'class-transformer'
 import { Note } from './note.entity'
 import { Group } from './group.entity'
-import { Folder } from './folder.entity'
+import { UserFolder } from './user-folder.entity'
 import { FolderPermission } from './folder-permission.entity'
+import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
 export class User extends Base {
@@ -24,18 +25,24 @@ export class User extends Base {
   @Exclude()
   password: string
 
-  @OneToMany(() => Note, (note) => note.user, { nullable: true })
+  @ApiProperty({ type: Note, isArray: true })
+  @OneToMany(() => Note, (note) => note.user)
   notes: Note[]
 
-  @ManyToMany(() => Group, (group) => group.users, { nullable: true })
+  @ApiProperty({ type: Group, isArray: true })
+  @ManyToMany(() => Group, { nullable: true })
+  @JoinTable()
   groups: Group[]
 
-  @OneToMany(() => Folder, (folder) => folder.user, { nullable: true })
-  folders: Folder[]
+  @ApiProperty({ type: UserFolder, isArray: true })
+  @OneToMany(() => UserFolder, (folder) => folder.user)
+  folders: UserFolder[]
 
+  @ApiProperty({ type: Group, isArray: true })
   @OneToMany(() => Group, (group) => group.admin, { nullable: true })
   adminOfGroups: Group[]
 
+  @ApiProperty({ type: FolderPermission, isArray: true })
   @OneToMany(() => FolderPermission, (fp) => fp.user)
   folderPermissions: FolderPermission[]
 }

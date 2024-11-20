@@ -1,19 +1,21 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm'
+import { Entity, ManyToOne, Column, JoinColumn } from 'typeorm'
 import { User } from './user.entity'
-import { Folder } from './folder.entity'
-import { Permission } from '../enums/permissions.enum'
+import { PermissionsEnum } from '../enums/permissions.enum'
+import { Base } from './base.entity'
+import { ApiProperty } from '@nestjs/swagger'
+import { BaseFolder } from './base-folder.entity'
 
 @Entity()
-export class FolderPermission {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
+export class FolderPermission extends Base {
+  @ManyToOne(() => BaseFolder, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'folderId' })
+  folder: BaseFolder
 
-  @ManyToOne(() => Folder, (folder) => folder.folderPermissions)
-  folder: Folder
-
-  @ManyToOne(() => User, (user) => user.folderPermissions)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user: User
 
-  @Column('simple-array')
-  permissions: Permission[]
+  @ApiProperty({ enum: PermissionsEnum, isArray: true })
+  @Column({ type: 'bigint', default: PermissionsEnum.NONE })
+  permissions: number
 }

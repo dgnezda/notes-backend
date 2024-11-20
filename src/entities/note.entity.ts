@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToOne, OneToOne } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
 import { Base } from './base.entity'
 import { User } from './user.entity'
-import { Folder } from './folder.entity'
+import { UserFolder } from './user-folder.entity'
+import { BaseFolder } from './base-folder.entity'
 
 @Entity()
 export class Note extends Base {
@@ -14,9 +15,14 @@ export class Note extends Base {
   @Column({ default: false })
   isPinned: boolean
 
-  @ManyToOne(() => User, (user) => user.notes)
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
   user: User
 
-  @ManyToOne(() => Folder, (folder) => folder.notes, { nullable: true })
-  folder: Folder
+  @ManyToOne(() => BaseFolder, (folder) => folder.notes, { nullable: true })
+  @JoinColumn({ name: 'folderId' })
+  folder: BaseFolder
+
+  @Column({ default: false })
+  isDeleted: boolean
 }

@@ -1,16 +1,18 @@
-import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm'
+import { Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm'
 import { Base } from './base.entity'
 import { User } from './user.entity'
-import { Folder } from './folder.entity'
+import { GroupFolder } from './group-folder.entity'
+import { ApiProperty } from '@nestjs/swagger'
 
 @Entity()
 export class Group extends Base {
   @ManyToOne(() => User, (user) => user.adminOfGroups, { nullable: true })
   admin: User
 
-  @ManyToMany(() => User, (user) => user.groups, { nullable: true })
+  @ManyToMany(() => User, { nullable: true })
   users: User[]
 
-  @ManyToMany(() => Folder, (folder) => folder.groups, { nullable: true })
-  folders: Folder[]
+  @ApiProperty({ type: GroupFolder, isArray: true })
+  @OneToMany(() => GroupFolder, (folder) => folder.group, { nullable: true })
+  folders: GroupFolder[]
 }

@@ -24,7 +24,7 @@ export class UsersService extends AbstractService {
   logger: Logger = new Logger()
 
   async findBy(criteria: Partial<User>): Promise<User> {
-    return this.usersRepository.findOne({ where: criteria })
+    return this.usersRepository.findOne({ where: criteria as any })
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {

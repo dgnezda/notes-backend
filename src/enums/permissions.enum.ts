@@ -1,9 +1,72 @@
-export enum Permission {
-  CREATE = 'CREATE', // This permission allows to CREATE new notes in shared folders
-  READ = 'READ', // This permission allows to READ notes in shared folders
-  EDIT = 'EDIT', // This permission allows to EDIT notes in shared folders
-  DELETE = 'DELETE', // This permission allows to DELETE notes in shared folders
-  SHARE = 'SHARE', // This permission allows to SHARE notes from shared folders to other users outside the shared folder
-  EXPORT = 'EXPORT', // This permission allows to EXPORT notes in shared folders
-  INVITE = 'INVITE', // This permission allows to INVITE other users to the shared folder
+export enum PermissionsEnum {
+  NONE = 0,
+  ALL = 1 << 0,
+
+  VIEW_NOTES = 1 << 1,
+  VIEW_PERMISSIONS = 1 << 2,
+  VIEW_CHANGELOG = 1 << 3,
+  VIEW_USERS = 1 << 4,
+  VIEW_PINNED = 1 << 5,
+  VIEW_TRASH = 1 << 6,
+
+  GROUP_FOLDER_ADD = 1 << 7,
+  GROUP_NOTE_ADD = 1 << 8,
+  GROUP_USER_INVITE = 1 << 9,
+  GROUP_USER_REMOVE = 1 << 10,
+
+  NOTE_PERMISSIONS = 1 << 11,
+  NOTE_RENAME = 1 << 12,
+  NOTE_DELETE = 1 << 13,
+  NOTE_MOVE = 1 << 14,
+  NOTE_COPY = 1 << 15,
+  NOTE_SEARCH = 1 << 16,
+  NOTE_DOWNLOAD = 1 << 17,
+  NOTE_UPDATE = 1 << 18,
+  NOTE_DOWNLOAD_BULK = 1 << 19,
+  NOTE_PERMANENT_DELETE = 1 << 20,
 }
+
+// NONE                        = 0,
+// ALL                         = 1 << 0,
+
+// DISCLAIMER_ACCESS           = 1 << 1,
+// VIEW_DOCUMENTS              = 1 << 2,
+// VIEW_PERMISSIONS            = 1 << 3,
+// VIEW_REPORTS                = 1 << 4,
+// VIEW_USERS                  = 1 << 5,
+
+// NEWFILES_VIEW               = 1 << 6,
+// FAVORITE_VIEW               = 1 << 7,
+// TRASH_VIEW                  = 1 << 8,
+// QUEUE_VIEW                  = 1 << 9,
+// TASK_VIEW                   = 1 << 10,
+
+// PROJECT_SEND_EMAIL          = 1 << 11,
+// PROJECT_FOLDER_ADD          = 1 << 12,
+// PROJECT_FILEROOM_ADD        = 1 << 13,
+// PROJECT_FILEROOM_ACTIVATE   = 1 << 14,
+// PROJECT_FILEROOM_DEACTIVATE = 1 << 15,
+
+// PROJECT_USER_INVITE         = 1 << 16,
+// PROJECT_USER_DEACTIVATE     = 1 << 17,
+// PROJECT_USER_ACTIVATE       = 1 << 18,
+// PROJECT_USER_CAG_CHANGE     = 1 << 19,
+// PROJECT_USER_FAG_CHANGE     = 1 << 20,
+
+// TEAM_QA_QUESTION            = 1 << 21,
+// TEAM_QA_ANSWER              = 1 << 22,
+// TEAM_QA_ANSWER_VIEW         = 1 << 23,
+// TEAM_QA_APPROVER            = 1 << 24,
+
+// CONTENT_UPLOAD              = 1 << 25,
+// CONTENT_PERMISSIONS         = 1 << 26,
+// CONTENT_RENAME              = 1 << 27,
+// CONTENT_DELETE              = 1 << 28,
+// CONTENT_MOVE                = 1 << 28,
+// CONTENT_COPY                = 1 << 30,
+// CONTENT_REPLACE             = 1 << 31,
+// CONTENT_SEARCH              = 1 << 32,
+// CONTENT_DOWNLOAD            = 1 << 33,
+// CONTENT_UPDATE              = 1 << 34,
+// CONTENT_DOWNLOAD_BULK       = 1 << 35,
+// CONTENT_PERMANENT_DELETE    = 1 << 36,
