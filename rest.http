@@ -3,37 +3,34 @@
 # List all notes
 GET http://localhost:3000/notes
 Accept: application/json
-
-###
-
-# List all notes by user ID
-GET http://localhost:3000/notes/user/737549bd-3f87-496a-9e1e-89101fb76d96
-Accept: application/json
+Cookie: access_token={{accessToken}}
 
 ###
 
 # Read a specific note by ID
 GET http://localhost:3000/notes/{{noteId}}
 Accept: application/json
+Cookie: access_token={{accessToken}}
 
 ###
 
 # Create a new note
 POST http://localhost:3000/notes
 Content-Type: application/json
+Cookie: access_token={{accessToken}}
 
 {
   "title": "Sample Note 2",
   "content": "This is a sample markdown **note** \n# By user Bon Flock!.",
-  "userId": "fa8418f7-095f-4ef6-b8c6-6aee17513e63",
   "isPinned": false
 }
 
 ###
 
 # Update a note by ID
-PUT http://localhost:3000/notes/566a4c6d-5fa0-4aa2-afc3-ce533bdb9f4e
+PUT http://localhost:3000/notes/{{noteId}}
 Content-Type: application/json
+Cookie: access_token={{accessToken}}
 
 {
   "title": "Sample Note",
@@ -44,8 +41,9 @@ Content-Type: application/json
 ###
 
 # Pin a note by ID
-PATCH http://localhost:3000/notes/566a4c6d-5fa0-4aa2-afc3-ce533bdb9f4e/pin
+PATCH http://localhost:3000/notes/{{noteId}}/pin
 Content-Type: application/json
+Cookie: access_token={{accessToken}}
 
 {
   "isPinned": false
@@ -56,6 +54,7 @@ Content-Type: application/json
 # Delete a note by ID
 DELETE http://localhost:3000/notes/{{noteId}}
 Accept: application/json
+Cookie: access_token={{accessToken}}
 
 ###
 
@@ -64,18 +63,21 @@ Accept: application/json
 # List all users
 GET http://localhost:3000/users
 Accept: application/json
+Cookie: access_token={{accessToken}}
 
 ###
 
 # Get a specific user by ID
-GET http://localhost:3000/users/737549bd-3f87-496a-9e1e-89101fb76d96
+GET http://localhost:3000/users/{{userId}}
 Accept: application/json
+Cookie: access_token={{accessToken}}
 
 ###
 
 # Create a new user
 POST http://localhost:3000/users
 Content-Type: application/json
+Cookie: access_token={{accessToken}}
 
 {
   "firstName": "John",
@@ -87,8 +89,9 @@ Content-Type: application/json
 ###
 
 # Update a user by ID
-PATCH http://localhost:3000/users/737549bd-3f87-496a-9e1e-89101fb76d96
+PATCH http://localhost:3000/users/{{userId}}
 Content-Type: application/json
+Cookie: access_token={{accessToken}}
 
 {
   "firstName": "Don",
@@ -100,6 +103,7 @@ Content-Type: application/json
 # Delete a user by ID
 DELETE http://localhost:3000/users/{{userId}}
 Accept: application/json
+Cookie: access_token={{accessToken}}
 
 ###
 
@@ -117,14 +121,6 @@ Content-Type: application/json
   "confirmPassword": "qwER12#$"
 }
 
-// {
-//   "firstName": "Don",
-//   "lastName": "Rock",
-//   "email": "donrockguitar@gmail.com",
-//   "password": "qwER12#$",
-//   "confirmPassword": "qwER12#$"
-// }
-
 ###
 
 # Login a user
@@ -135,11 +131,6 @@ Content-Type: application/json
   "email": "bonflock@gmail.com",
   "password": "qwER12#$"
 }
-
-// {
-//   "email": "donrockguitar@gmail.com",
-//   "password": "qwER12#$"
-// }
 
 ###
 
@@ -154,3 +145,119 @@ Cookie: access_token={{accessToken}}
 POST http://localhost:3000/auth/signout
 Accept: application/json
 Cookie: access_token={{accessToken}}
+
+###
+
+### Groups Endpoints
+
+# Create a new group
+POST http://localhost:3000/groups
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "name": "New Group"
+}
+
+###
+
+# Add a user to a group
+POST http://localhost:3000/groups/{{groupId}}/users
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "email": "user@example.com"
+}
+
+###
+
+# Assign a folder to a group
+POST http://localhost:3000/groups/{{groupId}}/folders
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "folderId": "{{folderId}}"
+}
+
+###
+
+### Folders Endpoints
+
+# Create a new folder
+POST http://localhost:3000/folders
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "name": "New Folder",
+  "description": "Folder description"
+}
+
+###
+
+# List all folders
+GET http://localhost:3000/folders
+Accept: application/json
+Cookie: access_token={{accessToken}}
+
+###
+
+# Get a folder by ID
+GET http://localhost:3000/folders/{{folderId}}
+Accept: application/json
+Cookie: access_token={{accessToken}}
+
+###
+
+# Update a folder by ID
+PATCH http://localhost:3000/folders/{{folderId}}
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "name": "Updated Folder Name",
+  "description": "Updated description"
+}
+
+###
+
+# Delete a folder by ID
+DELETE http://localhost:3000/folders/{{folderId}}
+Accept: application/json
+Cookie: access_token={{accessToken}}
+
+###
+
+# Share a folder
+POST http://localhost:3000/folders/{{folderId}}/share
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "userId": "{{userId}}",
+  "permissions": [1, 2, 3]  // Replace with actual permission enums
+}
+
+###
+
+### Folder Permissions Endpoints
+
+# Update permissions for a folder
+PATCH http://localhost:3000/folder-permissions/{{permissionId}}
+Content-Type: application/json
+Cookie: access_token={{accessToken}}
+
+{
+  "permissions": [1, 2, 3]  // Replace with actual permission enums
+}
+
+###
+
+# Delete folder permissions
+DELETE http://localhost:3000/folder-permissions/{{permissionId}}
+Accept: application/json
+Cookie: access_token={{accessToken}}
+
+###
