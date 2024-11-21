@@ -14,8 +14,14 @@ export class NotesController {
 
   @Get()
   async listNotes(@Req() req: Request): Promise<Note[]> {
-    const userId = req.user['id'];
-    return this.notesService.listNotes(userId);
+    const userId = req.user['id']
+    const notes = await this.notesService.listNotes(userId)
+    for (let note of notes) {
+      if (note.content === '' && (note.title === 'New Note' || note.title === '')) {
+        await this.notesService.deleteNote(note.id, userId)
+      }
+    }
+    return this.notesService.listNotes(userId)
   }
 
   // @Get('user/:userId')
@@ -25,47 +31,35 @@ export class NotesController {
 
   @Get(':id')
   async readNote(@Param('id') id: string, @Req() req: Request): Promise<Note> {
-    const userId = req.user['id'];
-    return this.notesService.readNote(id, userId);
+    const userId = req.user['id']
+    return this.notesService.readNote(id, userId)
   }
 
   @Post()
-  async createNote(
-    @Body() createNoteDto: CreateNoteDto,
-    @Req() req: Request,
-  ): Promise<Note> {
-    const userId = req.user['id'];
-    return this.notesService.createNote(
-      createNoteDto.title,
-      createNoteDto.content,
-      userId,
-      createNoteDto.isPinned,
-    );
+  async createNote(@Body() createNoteDto: CreateNoteDto, @Req() req: Request): Promise<Note> {
+    const userId = req.user['id']
+    return this.notesService.createNote(createNoteDto.title, createNoteDto.content, userId, createNoteDto.isPinned)
   }
 
   @Put(':id')
   async updateNote(
     @Param('id') id: string,
     @Body() { title, content, isPinned }: UpdateNoteDto,
-    @Req() req: Request
+    @Req() req: Request,
   ): Promise<Note> {
-    const userId = req.user['id'];
-    return this.notesService.updateNote(id, title, content, isPinned, userId);
+    const userId = req.user['id']
+    return this.notesService.updateNote(id, title, content, isPinned, userId)
   }
 
   @Patch(':id/pin')
-  async pinNote(
-    @Param('id') id: string,
-    @Body('isPinned') isPinned: boolean,
-    @Req() req: Request
-  ): Promise<Note> {
-    const userId = req.user['id'];
-    return this.notesService.pinNote(id, isPinned, userId);
+  async pinNote(@Param('id') id: string, @Body('isPinned') isPinned: boolean, @Req() req: Request): Promise<Note> {
+    const userId = req.user['id']
+    return this.notesService.pinNote(id, isPinned, userId)
   }
 
   @Delete(':id')
   async deleteNote(@Param('id') id: string, @Req() req: Request): Promise<void> {
-    const userId = req.user['id'];
-    return this.notesService.deleteNote(id, userId);
+    const userId = req.user['id']
+    return this.notesService.deleteNote(id, userId)
   }
 }

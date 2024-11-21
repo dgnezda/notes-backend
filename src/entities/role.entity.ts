@@ -1,17 +1,14 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm'
+import { Column, Entity, JoinTable, OneToMany } from 'typeorm'
 import { Base } from './base.entity'
-import { Permission } from './permission.entity'
+import { ApiProperty } from '@nestjs/swagger'
+import { PermissionsEnum } from '../enums/permissions.enum'
 
 @Entity()
 export class Role extends Base {
   @Column()
   name: string
 
-  @ManyToMany(() => Permission, { cascade: true })
-  @JoinTable({
-    name: 'role_permission',
-    joinColumn: { name: 'role_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'permission_id', referencedColumnName: 'id' },
-  })
-  permissions: Permission[]
+  @ApiProperty({ enum: PermissionsEnum, isArray: true })
+  @Column({ type: 'bigint', default: PermissionsEnum.NONE })
+  permissions: number
 }

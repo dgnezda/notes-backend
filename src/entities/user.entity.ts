@@ -31,7 +31,11 @@ export class User extends Base {
 
   @ApiProperty({ type: Group, isArray: true })
   @ManyToMany(() => Group, { nullable: true })
-  @JoinTable()
+  @JoinTable({
+    name: 'user_group',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'group_id', referencedColumnName: 'id' },
+  })
   groups: Group[]
 
   @ApiProperty({ type: UserFolder, isArray: true })
