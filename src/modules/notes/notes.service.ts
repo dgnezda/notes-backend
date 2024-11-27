@@ -19,7 +19,7 @@ export class NotesService {
     return this.noteRepository.find({
       where: { user: { id: userId } },
       relations: ['user'],
-    });
+    })
   }
 
   async createNote(title: string, content: string, userId: string, isPinned: boolean = false): Promise<Note> {
@@ -43,11 +43,11 @@ export class NotesService {
   async readNote(id: string, userId: string): Promise<Note> {
     const note = await this.noteRepository.findOne({
       where: { id, user: { id: userId } },
-    });
+    })
     if (!note) {
-      throw new NotFoundException(`Note not found`);
+      throw new NotFoundException(`Note not found`)
     }
-    return note;
+    return note
   }
 
   async updateNote(
@@ -55,49 +55,54 @@ export class NotesService {
     title: string,
     content: string,
     isPinned: boolean | undefined,
-    userId: string
+    isDeleted: boolean | undefined,
+    userId: string,
   ): Promise<Note> {
     const note = await this.noteRepository.findOne({
       where: { id, user: { id: userId } },
-    });
+    })
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`);
+      throw new NotFoundException(`Note with ID "${id}" not found`)
     }
 
-    note.title = title;
-    note.content = content;
+    note.title = title
+    note.content = content
     if (isPinned !== undefined) {
-      note.isPinned = isPinned;
+      note.isPinned = isPinned
     }
 
-    await this.noteRepository.save(note);
-    this.logger.log(`Note updated: ${id}`);
-    return note;
+    if (isDeleted !== undefined) {
+      note.isDeleted = isDeleted
+    }
+
+    await this.noteRepository.save(note)
+    this.logger.log(`Note updated: ${id}`)
+    return note
   }
 
   async deleteNote(id: string, userId: string): Promise<void> {
     const note = await this.noteRepository.findOne({
       where: { id, user: { id: userId } },
-    });
+    })
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`);
+      throw new NotFoundException(`Note with ID "${id}" not found`)
     }
 
-    await this.noteRepository.remove(note);
-    this.logger.log(`Note deleted: ${id}`);
+    await this.noteRepository.remove(note)
+    this.logger.log(`Note deleted: ${id}`)
   }
 
   async pinNote(id: string, isPinned: boolean, userId: string): Promise<Note> {
     const note = await this.noteRepository.findOne({
       where: { id, user: { id: userId } },
-    });
+    })
     if (!note) {
-      throw new NotFoundException(`Note with ID "${id}" not found`);
+      throw new NotFoundException(`Note with ID "${id}" not found`)
     }
 
-    note.isPinned = isPinned;
-    await this.noteRepository.save(note);
-    this.logger.log(`Note ${isPinned ? 'pinned' : 'unpinned'}: ${id}`);
-    return note;
+    note.isPinned = isPinned
+    await this.noteRepository.save(note)
+    this.logger.log(`Note ${isPinned ? 'pinned' : 'unpinned'}: ${id}`)
+    return note
   }
 }

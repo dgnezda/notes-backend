@@ -17,4 +17,9 @@ export class UpdateNoteDto {
   @IsNotEmpty()
   @IsBoolean()
   isPinned?: boolean
+
+  @ApiProperty({ required: false })
+  @IsNotEmpty()
+  @IsBoolean()
+  isDeleted?: boolean
 }

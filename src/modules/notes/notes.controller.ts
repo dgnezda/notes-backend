@@ -44,11 +44,11 @@ export class NotesController {
   @Put(':id')
   async updateNote(
     @Param('id') id: string,
-    @Body() { title, content, isPinned }: UpdateNoteDto,
+    @Body() { title, content, isPinned, isDeleted }: UpdateNoteDto,
     @Req() req: Request,
   ): Promise<Note> {
     const userId = req.user['id']
-    return this.notesService.updateNote(id, title, content, isPinned, userId)
+    return this.notesService.updateNote(id, title, content, isPinned, isDeleted, userId)
   }
 
   @Patch(':id/pin')
