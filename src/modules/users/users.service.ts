@@ -53,7 +53,7 @@ export class UsersService extends AbstractService {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = (await this.findById(id)) as User
-    const { email, password, confirmPassword, ...data } = updateUserDto // role_id
+    const { email, password, confirmPassword, avatar, ...data } = updateUserDto // role_id
     if (user.email !== email && email) {
       user.email = email
     }
@@ -65,6 +65,9 @@ export class UsersService extends AbstractService {
         throw new BadRequestException('New password cannot be the same as old password.')
       }
       user.password = await hash(password)
+    }
+    if (avatar) {
+      user.avatar = avatar
     }
     // if (role_id) {
     //   user.role = { ...user.role, id: role_id }
