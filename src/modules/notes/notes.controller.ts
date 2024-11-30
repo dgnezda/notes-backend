@@ -46,6 +46,15 @@ export class NotesController {
     return this.notesService.createNote(createNoteDto.title, createNoteDto.content, userId, createNoteDto.isPinned)
   }
 
+  @Post('bulk')
+  async createNotesBulk(
+    @Req() req: Request,
+    @Body() notesData: Partial<Note>[]
+  ): Promise<Note[]> {
+    const userId = req.user['id'];
+    return this.notesService.createNotesBulk(userId, notesData);
+  }
+
   @Put(':id')
   async updateNote(
     @Param('id') id: string,

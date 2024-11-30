@@ -43,6 +43,25 @@ export class NotesService {
     return note
   }
 
+  async createNotesBulk(userId: string, notesData: Partial<Note>[]): Promise<Note[]> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    // Validate and prepare notes
+    const notesToSave = notesData.map((noteData) => {
+      const note = new Note();
+      note.title = noteData.title || 'Untitled';
+      note.content = noteData.content || '';
+      note.user = user;
+      return note;
+    });
+  
+    return await this.noteRepository.save(notesToSave);
+  }
+
   async readNote(id: string, userId: string): Promise<Note> {
     const note = await this.noteRepository.findOne({
       where: { id, user: { id: userId } },
