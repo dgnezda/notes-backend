@@ -17,6 +17,7 @@ async function bootstrap() {
     origin: ['http://localhost:54321', 'http://localhost:54322'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     credentials: true,
+    exposedHeaders: ['Content-Disposition'],
   })
   app.useGlobalPipes(new ValidationPipe())
   app.use(cookieParser())

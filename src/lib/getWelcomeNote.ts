@@ -1,6 +1,6 @@
 export default function getWelcomeNote(): string {
   return `
-    Welcome to .md notes
+    Welcome to .md ink
 ========
 
 A short overview of the things you can do with the app:

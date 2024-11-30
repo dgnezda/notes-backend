@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
 import { Repository } from 'typeorm'
+import { Response } from 'express'
 import { Note } from 'entities/note.entity'
 import { User } from 'entities/user.entity'
 import { InjectRepository } from '@nestjs/typeorm'
+import archiver from 'archiver'
+import slugify from 'slugify'
 
 @Injectable()
 export class NotesService {
@@ -104,5 +107,36 @@ export class NotesService {
     await this.noteRepository.save(note)
     this.logger.log(`Note ${isPinned ? 'pinned' : 'unpinned'}: ${id}`)
     return note
+  }
+
+  async backupNotes(userId: string, res: Response): Promise<void> {
+    const notes = await this. noteRepository.find({
+      where: { user: {id: userId}}
+    })
+    const date: string = new Date().toISOString().replace(/[:.]/g, '-');
+
+    if (!notes.length) {
+      throw new NotFoundException('No notes found to backup!')
+    }
+
+    res.setHeader('Content-Type', 'application/zip')
+    res.setHeader('Content-Disposition', `attachment; filename="notes_backup_${date}.zip"`)
+
+    const archive = archiver('zip', { zlib: { level: 9 } })
+
+    archive.on('error', (err: Error): void => {
+      this.logger.error(`Archiving error while backing up notes for user with ID ${userId}:`, err);
+      res.status(500).end('An error occurred while creating the backup.');
+    });
+
+    archive.pipe(res)
+
+    for (const note of notes) {
+      const filename = `${slugify(note.title, { remove: /[*+~.()'"!:@]/g }) || 'untitled'}${ note.isDeleted ? '-[TRASHED]' : ''}.md`
+      archive.append(note.content || '', { name: filename })
+    }
+
+    await archive.finalize()
+    this.logger.log(`Notes backup generated for user: ${userId}`)
   }
 }
