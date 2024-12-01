@@ -66,6 +66,15 @@ function getBaseEmailTemplate(options: {
     <body>
       <div class="container">
         <div class="header">
+          <svg width="52" height="24" viewBox="0 0 52 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 23L21 12" stroke="black" stroke-width="2" stroke-linecap="round" />
+            <path d="M21 23L21 12" stroke="black" stroke-width="2" stroke-linecap="round" />
+            <path d="M21 23L36 12" stroke="black" stroke-width="2" stroke-linecap="round" />
+            <path d="M36 23V12" stroke="black" stroke-width="2" stroke-linecap="round" />
+            <path d="M36 23L51 12" stroke="black" stroke-width="2" stroke-linecap="round" />
+            <path d="M51 23L51 1" stroke="black" stroke-width="2" stroke-linecap="round" />
+            <path d="M1.8064 22L0.999991 22.5914" stroke="black" stroke-width="2" stroke-linecap="round" />
+          </svg>
           <h1>${title}</h1>
         </div>
         <div class="content">
@@ -83,7 +92,7 @@ function getBaseEmailTemplate(options: {
         ${
           additionalContent
             ? `
-          <div class="content">
+          <div class="content-sm">
             ${additionalContent}
           </div>
         `
@@ -98,8 +107,8 @@ function getBaseEmailTemplate(options: {
   `
 }
 
-// GET Reset Password HTML Email String
-export function getResetPwHtmlEmailString(resetLink: string): string {
+// Get Reset Password HTML Email String
+export function getPasswordResetEmail(resetLink: string): string {
   const title = 'Password Reset Request'
   const content = `
     <p>Hello,</p>
@@ -115,8 +124,8 @@ export function getResetPwHtmlEmailString(resetLink: string): string {
   return getBaseEmailTemplate({ title, content, buttonText, buttonLink, additionalContent })
 }
 
-// GET Confirm Email HTML Email String
-export function getConfirmEmailHtmlEmailString(confirmLink: string): string {
+// Get Confirm Email HTML Email String
+export function getEmailConfirmationEmail(confirmLink: string): string {
   const title = 'Email Confirmation'
   const content = `
     <p>Hello,</p>
@@ -132,12 +141,12 @@ export function getConfirmEmailHtmlEmailString(confirmLink: string): string {
   return getBaseEmailTemplate({ title, content, buttonText, buttonLink, additionalContent })
 }
 
-// GET Share Note Internally Email String
-export function getShareNoteInternallyEmailString(note: Note, noteLink: string): string {
+// Get Share Note Internally Email String
+export function getInternalNoteShareEmail(noteTitle: string, noteLink: string): string {
   const title = 'Note Shared with You'
   const content = `
     <p>Hello,</p>
-    <p>A note titled "<strong>${note.title}</strong>" has been shared with you.</p>
+    <p>A note titled "<strong>${noteTitle}</strong>" has been shared with you.</p>
     <p>Click the button below to view it:</p>
   `
   const buttonText = 'View Note'
@@ -149,18 +158,35 @@ export function getShareNoteInternallyEmailString(note: Note, noteLink: string):
   return getBaseEmailTemplate({ title, content, buttonText, buttonLink, additionalContent })
 }
 
-// GET Share Note to Non-Existing User Email String
-export function getShareNoteToOtherString(note: Note, registerLink: string): string {
+// Get Share Note to Non-Existing User Email String
+export function getExternalNoteShareEmail(noteTitle: string, registerLink: string): string {
   const title = 'A Note Has Been Shared with You'
   const content = `
     <p>Hello,</p>
-    <p>An .md notes user has shared a note titled "<strong>${note.title}</strong>" with you.</p>
+    <p>An .md notes user has shared a note titled "<strong>${noteTitle}</strong>" with you.</p>
     <p>To view the note, please register:</p>
   `
   const buttonText = 'Register Now'
   const buttonLink = registerLink
   const additionalContent = `
     <p>If you did not expect this, you can safely ignore this email.</p>
+  `
+
+  return getBaseEmailTemplate({ title, content, buttonText, buttonLink, additionalContent })
+}
+
+// Welcome Email
+export function getWelcomeEmail(userName: string): string {
+  const title = 'Welcome to .md notes!'
+  const content = `
+    <p>Hello ${userName},</p>
+    <p>We're excited to have you on board. Your registration is now complete.</p>
+    <p>You can start using .md notes by clicking the button below:</p>
+  `
+  const buttonText = 'Log In'
+  const buttonLink = 'www.dotmd.ink/login'
+  const additionalContent = `
+    <p>If you have any questions, feel free to reach out to our support team.</p>
   `
 
   return getBaseEmailTemplate({ title, content, buttonText, buttonLink, additionalContent })
