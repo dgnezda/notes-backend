@@ -12,11 +12,12 @@ Hint: click **Edit** to see how this welcome note was formatted! Hope you enjoy 
 
 Keyboard shortcuts for common tasks:
 - \`Ctrl + Alt + N\`: Add new note
+- \`Ctrl + Alt + A\`: Save note
 - \`Ctrl + Alt + E\`: Enter/exit edit mode
-- \`Ctrl + Alt + X\`: Open export file dialog
 - \`Ctrl + Alt + P\`: Export as .pdf
 - \`Ctrl + Alt + M\`: Export as .md
 - \`Ctrl + Alt + U\`: Toggle pin/unpin selected note
+- and more!
 
 Note: Replace Ctrl + Alt with \`Ctrl + Option\` on **macOS**!  
 
