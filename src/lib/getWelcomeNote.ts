@@ -49,8 +49,12 @@ Examples:
 
 ![Alt Text](https://img.freepik.com/free-photo/close-up-portrait-beautiful-cat_23-2149214419.jpg)
 
-\`\`\`language
-// Your code here with a neat copy to clipboard button on the right =>
+\`\`\`python
+# Your code here with a neat copy to clipboard button on the right =\>
+def oh_wow():
+    it_even_has = 3
+    syntax_highlight = '4'
+    return it_even_has + int(syntax_highlight)
 \`\`\`
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=5-aK2_WwrmM
