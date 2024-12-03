@@ -27,11 +27,11 @@ export class NotesController {
   // async listNotesByUser(@Param('userId') userId: string): Promise<Note[]> {
   //   return this.notesService.listNotesByUser(userId)
   // }
-  
+
   @Get('backup')
   async backupNotes(@Req() req: Request, @Res() res: Response): Promise<void> {
     const userId = req.user['id']
-    return this.notesService.backupNotes(userId, res);
+    return this.notesService.backupNotes(userId, res)
   }
 
   @Get(':id([0-9a-fA-F-]{36})')
@@ -47,12 +47,9 @@ export class NotesController {
   }
 
   @Post('bulk')
-  async createNotesBulk(
-    @Req() req: Request,
-    @Body() notesData: Partial<Note>[]
-  ): Promise<Note[]> {
-    const userId = req.user['id'];
-    return this.notesService.createNotesBulk(userId, notesData);
+  async createNotesBulk(@Req() req: Request, @Body() notesData: Partial<Note>[]): Promise<Note[]> {
+    const userId = req.user['id']
+    return this.notesService.createNotesBulk(userId, notesData)
   }
 
   @Put(':id')
@@ -75,5 +72,11 @@ export class NotesController {
   async deleteNote(@Param('id') id: string, @Req() req: Request): Promise<void> {
     const userId = req.user['id']
     return this.notesService.deleteNote(id, userId)
+  }
+
+  @Post(':id/share')
+  async shareNote(@Param('id') id: string, @Body('email') email: string, @Req() req: Request): Promise<void> {
+    const userId = req.user['id']
+    return this.notesService.shareNote(id, email, userId)
   }
 }

@@ -12,12 +12,14 @@ import { UpdateUserDto } from './dto/update-user.dto'
 import getWelcomeNote from 'lib/getWelcomeNote'
 import { Note } from 'entities/note.entity'
 import { NotesService } from 'modules/notes/notes.service'
+import { EmailService } from 'modules/email/email.service'
 
 @Injectable()
 export class UsersService extends AbstractService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     private readonly notesService: NotesService,
+    private readonly emailService: EmailService,
   ) {
     super(usersRepository)
   }

@@ -6,6 +6,9 @@ import { User } from 'entities/user.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import archiver from 'archiver'
 import slugify from 'slugify'
+import { JwtService } from '@nestjs/jwt'
+import { getInternalNoteShareEmail, getExternalNoteShareEmail } from 'lib/getEmailString'
+import { EmailService } from 'modules/email/email.service'
 
 @Injectable()
 export class NotesService {
@@ -16,6 +19,8 @@ export class NotesService {
     private noteRepository: Repository<Note>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private emailService: EmailService,
+    private jwtService: JwtService,
   ) {}
 
   async listNotes(userId: string): Promise<Note[]> {
@@ -44,22 +49,22 @@ export class NotesService {
   }
 
   async createNotesBulk(userId: string, notesData: Partial<Note>[]): Promise<Note[]> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-  
+    const user = await this.userRepository.findOne({ where: { id: userId } })
+
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found')
     }
-  
+
     // Validate and prepare notes
     const notesToSave = notesData.map((noteData) => {
-      const note = new Note();
-      note.title = noteData.title || 'Untitled';
-      note.content = noteData.content || '';
-      note.user = user;
-      return note;
-    });
-  
-    return await this.noteRepository.save(notesToSave);
+      const note = new Note()
+      note.title = noteData.title || 'Untitled'
+      note.content = noteData.content || ''
+      note.user = user
+      return note
+    })
+
+    return await this.noteRepository.save(notesToSave)
   }
 
   async readNote(id: string, userId: string): Promise<Note> {
@@ -129,10 +134,10 @@ export class NotesService {
   }
 
   async backupNotes(userId: string, res: Response): Promise<void> {
-    const notes = await this. noteRepository.find({
-      where: { user: {id: userId}}
+    const notes = await this.noteRepository.find({
+      where: { user: { id: userId } },
     })
-    const date: string = new Date().toISOString().replace(/[:.]/g, '-');
+    const date: string = new Date().toISOString().replace(/[:.]/g, '-')
 
     if (!notes.length) {
       throw new NotFoundException('No notes found to backup!')
@@ -144,18 +149,71 @@ export class NotesService {
     const archive = archiver('zip', { zlib: { level: 9 } })
 
     archive.on('error', (err: Error): void => {
-      this.logger.error(`Archiving error while backing up notes for user with ID ${userId}:`, err);
-      res.status(500).end('An error occurred while creating the backup.');
-    });
+      this.logger.error(`Archiving error while backing up notes for user with ID ${userId}:`, err)
+      res.status(500).end('An error occurred while creating the backup.')
+    })
 
     archive.pipe(res)
 
     for (const note of notes) {
-      const filename = `${slugify(note.title, { remove: /[*+~.()'"!:@]/g }) || 'untitled'}${ note.isDeleted ? '-[TRASHED]' : ''}.md`
+      const filename = `${slugify(note.title, { remove: /[*+~.()'"!:@]/g }) || 'untitled'}${note.isDeleted ? '-[TRASHED]' : ''}.md`
       archive.append(note.content || '', { name: filename })
     }
 
     await archive.finalize()
     this.logger.log(`Notes backup generated for user: ${userId}`)
+  }
+
+  async shareNote(noteId: string, recipientEmail: string, userId: string): Promise<void> {
+    const note = await this.noteRepository.findOne({
+      where: { id: noteId, user: { id: userId } },
+    })
+    if (!note) {
+      throw new NotFoundException(`Note with ID "${noteId}" not found`)
+    }
+
+    const recipient: User = await this.userRepository.findOne({ where: { email: recipientEmail } })
+
+    if (recipient) {
+      // Share note with existing user
+      const newNote: Note = this.noteRepository.create({
+        ...note,
+        id: undefined,
+        user: recipient,
+      })
+      await this.noteRepository.save(newNote)
+
+      const sharedNoteLink = `${process.env.APP_URL}/notes/${newNote.id}`
+      this.logger.log(`Note shared with user ${recipientEmail}: ${sharedNoteLink}`)
+
+      const emailContent = getInternalNoteShareEmail(note.title, sharedNoteLink)
+
+      await this.emailService.sendMail(recipientEmail, 'A Note has been shared with you!', emailContent)
+    } else {
+      // New user
+      const inviteToken = this.jwtService.sign({ email: recipientEmail, noteId: note.id }, { expiresIn: '14d' })
+
+      const registerLink = `${process.env.APP_URL}/register?inviteToken=${inviteToken}`
+      const emailContent = getExternalNoteShareEmail(note.title, registerLink)
+
+      await this.emailService.sendMail(
+        recipientEmail,
+        `${note.user.firstName} has shared a Note with you!`,
+        emailContent,
+      )
+    }
+  }
+
+  async copyNoteToUser(noteId: string, userId: string): Promise<void> {
+    const note = await this.noteRepository.findOne({ where: { id: noteId } })
+    if (note) {
+      const user = await this.userRepository.findOne({ where: { id: userId } })
+      const newNote = this.noteRepository.create({
+        ...note,
+        id: undefined,
+        user: user,
+      })
+      await this.noteRepository.save(newNote)
+    }
   }
 }
