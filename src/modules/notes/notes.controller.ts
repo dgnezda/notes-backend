@@ -75,8 +75,8 @@ export class NotesController {
   }
 
   @Post(':id/share')
-  async shareNote(@Param('id') id: string, @Body('email') email: string, @Req() req: Request): Promise<void> {
+  async shareNote(@Param('id') id: string, @Body('emails') emails: string[], @Req() req: Request): Promise<void> {
     const userId = req.user['id']
-    return this.notesService.shareNote(id, email, userId)
+    return this.notesService.shareNote(id, emails, userId)
   }
 }

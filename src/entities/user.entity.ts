@@ -49,4 +49,13 @@ export class User extends Base {
   @ApiProperty({ type: FolderPermission, isArray: true })
   @OneToMany(() => FolderPermission, (fp) => fp.user)
   folderPermissions: FolderPermission[]
+
+  @ApiProperty({ type: User, isArray: true })
+  @ManyToMany(() => User, (user) => user.friends)
+  @JoinTable({
+    name: 'user_friends',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'friend_id', referencedColumnName: 'id' },
+  })
+  friends: User[]
 }
