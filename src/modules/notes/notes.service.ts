@@ -178,6 +178,12 @@ export class NotesService {
         const recipient: User = await this.userRepository.findOne({ where: { email: recipientEmail } })
 
         if (recipient) {
+          // Check if recipient is in friends list of the note owner, if not, add them
+          const isFriend = note.user.friends.some((friend) => friend.id === recipient.id)
+          if (!isFriend) {
+            note.user.friends.push(recipient)
+            await this.userRepository.save(note.user)
+          }
           // Share note with existing user
           const newNote: Note = this.noteRepository.create({
             ...note,
