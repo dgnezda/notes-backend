@@ -11,6 +11,8 @@ import { JwtAuthGuard } from './guards/jwt.guard'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { NotesService } from '../notes/notes.service'
 import { NotesModule } from '../notes/notes.module'
+import { EmailModule } from 'modules/email/email.module'
+import { EmailService } from 'modules/email/email.service'
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { NotesModule } from '../notes/notes.module'
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        global: true,
+        // global: true,
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: `${configService.get<string>('JWT_SECRET_EXPIRES')}s` },
       }),
@@ -34,6 +36,7 @@ import { NotesModule } from '../notes/notes.module'
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    EmailService,
     // NotesService,
     // {
     //   provide: APP_GUARD,

@@ -6,12 +6,24 @@ import { User } from 'entities/user.entity'
 import { Note } from 'entities/note.entity'
 import { UsersService } from 'modules/users/users.service'
 import { EmailService } from 'modules/email/email.service'
-import { JwtService } from '@nestjs/jwt'
+import { JwtModule } from '@nestjs/jwt'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Note, User])],
+  imports: [
+    TypeOrmModule.forFeature([Note, User]),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        // global: true,
+        secret: configService.get<string>('JWT_SECRET'),
+        // signOptions: { expiresIn: `${configService.get<string>('JWT_SECRET_EXPIRES')}s` },
+      }),
+      inject: [ConfigService],
+    }),
+  ],
   controllers: [NotesController],
-  providers: [NotesService, UsersService, EmailService, JwtService],
+  providers: [NotesService, UsersService, EmailService],
   exports: [NotesService],
 })
 export class NotesModule {}

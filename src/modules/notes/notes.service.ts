@@ -167,23 +167,36 @@ export class NotesService {
   async shareNote(noteId: string, recipientEmails: string[], userId: string): Promise<void> {
     const note = await this.noteRepository.findOne({
       where: { id: noteId, user: { id: userId } },
-      relations: ['user'], // Include note owner data
+      relations: ['user'],
     })
     if (!note) {
       throw new NotFoundException(`Note with ID "${noteId}" not found`)
     }
 
+    const sender = note.user
+
     const sharePromises = recipientEmails.map(async (recipientEmail) => {
       try {
-        const recipient: User = await this.userRepository.findOne({ where: { email: recipientEmail } })
+        const recipient: User = await this.userRepository.findOne({
+          where: { email: recipientEmail },
+        })
 
         if (recipient) {
-          // Check if recipient is in friends list of the note owner, if not, add them
-          const isFriend = note.user.friends.some((friend) => friend.id === recipient.id)
+          // Check if already friends
+          const isFriend = await this.userRepository
+            .createQueryBuilder('user')
+            .relation(User, 'friends')
+            .of(sender)
+            .loadMany()
+            .then((friends) => friends.some((friend) => friend.id === recipient.id))
+
           if (!isFriend) {
-            note.user.friends.push(recipient)
-            await this.userRepository.save(note.user)
+            // Add each other as friends without loading full entities
+            await this.userRepository.createQueryBuilder().relation(User, 'friends').of(sender).add(recipient.id)
+
+            await this.userRepository.createQueryBuilder().relation(User, 'friends').of(recipient).add(sender.id)
           }
+
           // Share note with existing user
           const newNote: Note = this.noteRepository.create({
             ...note,
@@ -197,10 +210,11 @@ export class NotesService {
 
           const emailContent = getInternalNoteShareEmail(note.title, sharedNoteLink)
 
-          console.log(`Internal email to existing user: ${recipientEmail}`)
-          console.log(`Subject: ${note.user.firstName} has shared a Note with you via dotmd.ink!`)
-          console.log(`Content: ${emailContent}`)
-          // await this.emailService.sendMail(recipientEmail, `${note.user.firstName} has shared a Note with you!`, emailContent);
+          await this.emailService.sendMail(
+            recipientEmail,
+            `${note.user.firstName} has shared a Note with you via dotmd.ink!`,
+            emailContent,
+          )
         } else {
           // New user
           const inviteToken = this.jwtService.sign({ email: recipientEmail, noteId: note.id }, { expiresIn: '14d' })
@@ -209,11 +223,11 @@ export class NotesService {
           const emailContent = getExternalNoteShareEmail(note.title, registerLink)
 
           this.logger.log(`Note invitation sent to new user ${recipientEmail}: ${registerLink}`)
-
-          console.log(`External email to non-registered user: ${recipientEmail}`)
-          console.log(`Subject: ${note.user.firstName} has shared a Note with you via dotmd.ink!`)
-          console.log(`Content: ${emailContent}`)
-          // await this.emailService.sendMail(recipientEmail, `${note.user.firstName} has invited you to view a note!`, emailContent);
+          await this.emailService.sendMail(
+            recipientEmail,
+            `${note.user.firstName} has invited you to view a note via dotmd.ink!`,
+            emailContent,
+          )
         }
       } catch (error) {
         this.logger.error(`Failed to share note with ${recipientEmail}: ${error.message}`)

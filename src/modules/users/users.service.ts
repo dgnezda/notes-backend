@@ -10,9 +10,9 @@ import { compareHash, hash } from '../../lib/bcrypt'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import getWelcomeNote from 'lib/getWelcomeNote'
-import { Note } from 'entities/note.entity'
 import { NotesService } from 'modules/notes/notes.service'
 import { EmailService } from 'modules/email/email.service'
+import { getWelcomeEmail } from 'lib/getEmailString'
 
 @Injectable()
 export class UsersService extends AbstractService {
@@ -38,7 +38,17 @@ export class UsersService extends AbstractService {
       const newUser = this.usersRepository.create({ ...createUserDto }) // role: { id: createUserDto.role_id }
       newUser.notes = []
       newUser.groups = []
+      newUser.friends = []
+      newUser.folders = []
+      newUser.folderPermissions = []
+      newUser.adminOfGroups = []
       const savedUser = await this.usersRepository.save(newUser)
+
+      // Send Welcome Email
+      const emailContent = getWelcomeEmail(savedUser.firstName)
+      await this.emailService.sendMail(savedUser.email, 'Welcome to .md notes!', emailContent)
+
+      // Add welcome note to new user
       const welcomeNoteContent: string = getWelcomeNote()
       await this.notesService.createNote(
         'Welcome to md notes!',

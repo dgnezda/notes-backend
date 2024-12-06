@@ -53,9 +53,12 @@ export class User extends Base {
   @ApiProperty({ type: User, isArray: true })
   @ManyToMany(() => User, (user) => user.friends)
   @JoinTable({
-    name: 'user_friends',
+    name: 'user_friend',
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'friend_id', referencedColumnName: 'id' },
   })
   friends: User[]
+
+  @Column({ default: false })
+  isEmailConfirmed: boolean
 }

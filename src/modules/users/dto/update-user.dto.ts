@@ -34,4 +34,8 @@ export class UpdateUserDto {
   @IsOptional()
   @Match(UpdateUserDto, (field) => field.password, { message: 'Passwords do not match.' })
   confirmPassword?: string
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  isEmailConfirmed?: boolean
 }

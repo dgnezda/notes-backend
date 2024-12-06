@@ -10,6 +10,8 @@ import {
   UseGuards,
   Req,
   Res,
+  Query,
+  BadRequestException,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger'
@@ -19,12 +21,18 @@ import { User } from 'entities/user.entity'
 import { LocalAuthGuard } from './guards/local-auth.guard'
 import { RequestWithUser } from 'interfaces/auth.interface'
 import { Request, Response } from 'express'
+import { UsersService } from 'modules/users/users.service'
+import { JwtService } from '@nestjs/jwt'
 
 @ApiTags('auth')
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
   @ApiCreatedResponse({ description: 'Registers new user.' })
   @ApiBadRequestResponse({ description: 'Error for registering new user.' })
@@ -63,5 +71,21 @@ export class AuthController {
   async signout(@Res({ passthrough: true }) res: Response): Promise<{ msg: string }> {
     res.clearCookie('access_token')
     return { msg: 'ok' }
+  }
+
+  @Get('confirm-email')
+  async confirmEmail(@Query('token') token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync(token)
+      const user = await this.usersService.findById(payload.id)
+      if (!user) {
+        throw new BadRequestException('Invalid token')
+      }
+      user.isEmailConfirmed = true
+      await this.usersService.update(user.id, { isEmailConfirmed: true })
+      return 'Email confirmed successfully'
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired token')
+    }
   }
 }

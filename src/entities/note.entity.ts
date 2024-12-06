@@ -1,7 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
 import { Base } from './base.entity'
 import { User } from './user.entity'
-import { UserFolder } from './user-folder.entity'
 import { BaseFolder } from './base-folder.entity'
 
 @Entity()

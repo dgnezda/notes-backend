@@ -6,6 +6,8 @@ import { compareHash, hash } from 'lib/bcrypt'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { RequestWithUser } from 'interfaces/auth.interface'
 import { NotesService } from '../notes/notes.service'
+import { getEmailConfirmationEmail } from 'lib/getEmailString'
+import { EmailService } from 'modules/email/email.service'
 
 @Injectable()
 export class AuthService {
@@ -13,6 +15,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private notesService: NotesService,
+    private emailService: EmailService,
   ) {}
   logger = new Logger('AuthService')
 
@@ -37,6 +40,13 @@ export class AuthService {
       password: hashedPassword,
     })
 
+    // Send Email Confirmation
+    const emailConfirmToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1d' })
+    const confirmLink = `${process.env.APP_URL}/auth/confirm-email?token=${emailConfirmToken}`
+    const emailContent = getEmailConfirmationEmail(confirmLink)
+    await this.emailService.sendMail(user.email, 'Please confirm your email', emailContent)
+
+    // Copy note to user if token is provided
     if (token) {
       try {
         const payload = await this.jwtService.verifyAsync(token)
