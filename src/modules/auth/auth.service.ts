@@ -6,8 +6,9 @@ import { compareHash, hash } from 'lib/bcrypt'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { RequestWithUser } from 'interfaces/auth.interface'
 import { NotesService } from '../notes/notes.service'
-import { getEmailConfirmationEmail } from 'lib/getEmailString'
+import { getEmailConfirmationEmail, getPasswordResetEmail } from 'lib/getEmailString'
 import { EmailService } from 'modules/email/email.service'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @Injectable()
 export class AuthService {
@@ -17,18 +18,23 @@ export class AuthService {
     private notesService: NotesService,
     private emailService: EmailService,
   ) {}
-  logger = new Logger('AuthService')
+  logger = new Logger(AuthService.name)
 
   async validateUser(email: string, password: string): Promise<User> {
     this.logger.log('Validating user...')
     const user = await this.usersService.findBy({ email: email })
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials')
+      throw new BadRequestException('User with this email does not exist.')
     }
     const isPasswordValid = await compareHash(password, user.password)
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials')
     }
+
+    if (!user.isEmailConfirmed) {
+      throw new UnauthorizedException('You need to verify your email before logging in!')
+    }
+
     this.logger.log('User validated successfully')
     return user
   }
@@ -79,5 +85,38 @@ export class AuthService {
 
   async validateUserById(id: string): Promise<User> {
     return this.usersService.findById(id)
+  }
+
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    const user = await this.usersService.findBy({ email })
+
+    if (!user) {
+      // For security, you might want to pretend the email was sent
+      throw new BadRequestException('User with this email does not exist.')
+    }
+
+    const resetToken = this.jwtService.sign({ id: user.id }, { expiresIn: '10m' })
+    const resetLink = `${process.env.APP_URL}/auth/reset-password?token=${resetToken}`
+
+    const emailContent = getPasswordResetEmail(resetLink)
+    await this.emailService.sendMail(user.email, 'Password Reset Request', emailContent)
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
+    const { token, newPassword } = resetPasswordDto
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token)
+      const user = await this.usersService.findById(payload.id)
+
+      if (!user) {
+        throw new BadRequestException('Invalid token')
+      }
+
+      user.password = await hash(newPassword)
+      await this.usersService.update(user.id, user)
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired token')
+    }
   }
 }

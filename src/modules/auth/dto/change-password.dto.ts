@@ -10,9 +10,9 @@ export class ChangePasswordDto {
 
   @ApiProperty({ required: true })
   @IsNotEmpty()
-  @Matches(/^(?=.*\d)[A-Za-z.\s_-]+[\w~@#$%^&*+=`|{}:;!.?"()[\]-]{6,}/, {
+  @Matches(/^(?=.*\d)[A-Za-z.\s_-]+[\w~@#$%^&*+=`|{}:;!.?"()[\]-]{8,}/, {
     message:
-      'Password must have at least one number, lower or uppercase letter, and it has to be 6 characters or longer.',
+      'Password must have at least one number, lower or uppercase letter, and it has to be 8 characters or longer.',
   })
   newPassword: string
 

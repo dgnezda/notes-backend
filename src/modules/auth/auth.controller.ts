@@ -23,6 +23,9 @@ import { RequestWithUser } from 'interfaces/auth.interface'
 import { Request, Response } from 'express'
 import { UsersService } from 'modules/users/users.service'
 import { JwtService } from '@nestjs/jwt'
+import { getWelcomeEmail } from 'lib/getEmailString'
+import { EmailService } from 'modules/email/email.service'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -32,6 +35,7 @@ export class AuthController {
     private authService: AuthService,
     private usersService: UsersService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   @ApiCreatedResponse({ description: 'Registers new user.' })
@@ -73,19 +77,49 @@ export class AuthController {
     return { msg: 'ok' }
   }
 
+  @ApiCreatedResponse({ description: 'Confirms email.' })
+  @ApiBadRequestResponse({ description: 'Error for confirming email.' })
   @Get('confirm-email')
+  @HttpCode(HttpStatus.OK)
   async confirmEmail(@Query('token') token: string): Promise<string> {
     try {
       const payload = await this.jwtService.verifyAsync(token)
       const user = await this.usersService.findById(payload.id)
+
       if (!user) {
         throw new BadRequestException('Invalid token')
       }
+
       user.isEmailConfirmed = true
-      await this.usersService.update(user.id, { isEmailConfirmed: true })
+      await this.usersService.update(user.id, user)
+
+      // Send Welcome Email after email confirmation
+      const emailContent = getWelcomeEmail(user.firstName)
+      await this.emailService.sendMail(user.email, 'Welcome to .md notes!', emailContent)
+
       return 'Email confirmed successfully'
     } catch (error) {
       throw new BadRequestException('Invalid or expired token')
     }
+  }
+
+  @ApiCreatedResponse({ description: 'Requests password reset.' })
+  @ApiBadRequestResponse({ description: 'Error requesting password reset.' })
+  @Public()
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK)
+  async requestPasswordReset(@Body('email') email: string): Promise<{ message: string }> {
+    await this.authService.sendPasswordResetEmail(email)
+    return { message: 'Password reset email sent.' }
+  }
+
+  @ApiCreatedResponse({ description: 'Resets password.' })
+  @ApiBadRequestResponse({ description: 'Error resetting password.' })
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+    await this.authService.resetPassword(resetPasswordDto)
+    return { message: 'Password has been reset successfully.' }
   }
 }
