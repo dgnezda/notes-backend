@@ -1,10 +1,24 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Patch, Req, UseGuards, Res } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Patch,
+  Req,
+  UseGuards,
+  Res,
+  SetMetadata,
+} from '@nestjs/common'
 import { NotesService } from './notes.service'
 import { Note } from 'entities/note.entity'
 import { CreateNoteDto } from './dto/create-note.dto'
 import { UpdateNoteDto } from './dto/update-note.dto'
 import { Request, Response } from 'express'
 import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
+import { Public } from 'decorators/public.decorator'
 
 @Controller('notes')
 @UseGuards(JwtAuthGuard)
@@ -78,5 +92,11 @@ export class NotesController {
   async shareNote(@Param('id') id: string, @Body('emails') emails: string[], @Req() req: Request): Promise<void> {
     const userId = req.user['id']
     return this.notesService.shareNote(id, emails, userId)
+  }
+
+  @Public()
+  @Get('share/:token')
+  async getSharedNote(@Param('token') token: string): Promise<Note> {
+    return this.notesService.getSharedNoteByToken(token)
   }
 }

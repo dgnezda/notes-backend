@@ -9,6 +9,8 @@ import slugify from 'slugify'
 import { JwtService } from '@nestjs/jwt'
 import { getInternalNoteShareEmail, getExternalNoteShareEmail } from 'lib/getEmailString'
 import { EmailService } from 'modules/email/email.service'
+import { v4 as uuidv4 } from 'uuid'
+import { ShareToken } from 'entities/share-token.entity'
 
 @Injectable()
 export class NotesService {
@@ -19,6 +21,8 @@ export class NotesService {
     private noteRepository: Repository<Note>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(ShareToken)
+    private shareTokenRepository: Repository<ShareToken>,
     private emailService: EmailService,
     private jwtService: JwtService,
   ) {}
@@ -208,7 +212,7 @@ export class NotesService {
           const sharedNoteLink = `${process.env.APP_URL}/notes/${newNote.id}`
           this.logger.log(`Note shared with user ${recipientEmail}: ${sharedNoteLink}`)
 
-          const emailContent = getInternalNoteShareEmail(note.title, sharedNoteLink)
+          const emailContent = getInternalNoteShareEmail(note.title, sharedNoteLink, note.user.firstName)
 
           await this.emailService.sendMail(
             recipientEmail,
@@ -217,12 +221,15 @@ export class NotesService {
           )
         } else {
           // New user
-          const inviteToken = this.jwtService.sign({ email: recipientEmail, noteId: note.id }, { expiresIn: '14d' })
+          const shareToken = uuidv4()
+          const tokenExpiry = new Date()
+          tokenExpiry.setDate(tokenExpiry.getDate() + 14) // 14 days
+          await this.saveShareToken(shareToken, noteId, tokenExpiry)
 
-          const registerLink = `${process.env.APP_URL}/register?inviteToken=${inviteToken}`
-          const emailContent = getExternalNoteShareEmail(note.title, registerLink)
+          const shareLink = `${process.env.APP_URL}/shared-notes/${shareToken}`
+          const emailContent = getExternalNoteShareEmail(note.title, shareLink, note.user.firstName)
 
-          this.logger.log(`Note invitation sent to new user ${recipientEmail}: ${registerLink}`)
+          this.logger.log(`Note invitation sent to new user ${recipientEmail} at ${shareLink}`)
           await this.emailService.sendMail(
             recipientEmail,
             `${note.user.firstName} has invited you to view a note via dotmd.ink!`,
@@ -248,5 +255,45 @@ export class NotesService {
       })
       await this.noteRepository.save(newNote)
     }
+  }
+
+  async getSharedNoteByToken(token: string): Promise<Note> {
+    const shareRecord = await this.getShareToken(token)
+
+    if (!shareRecord || shareRecord.expiry < new Date()) {
+      throw new NotFoundException('Invalid or expired share token.')
+    }
+
+    const note = await this.noteRepository.findOne({
+      where: { id: shareRecord.noteId },
+    })
+
+    if (!note) {
+      throw new NotFoundException('Note not found.')
+    }
+    return note
+  }
+
+  private async getShareToken(token: string): Promise<ShareToken> {
+    const shareToken = await this.shareTokenRepository.findOne({
+      where: { token },
+    })
+
+    if (!shareToken) {
+      throw new NotFoundException('Share token not found.')
+    }
+
+    return shareToken
+  }
+
+  private async saveShareToken(token: string, noteId: string, expiry: Date): Promise<void> {
+    const shareToken = this.shareTokenRepository.create({
+      token,
+      noteId,
+      expiry,
+    })
+
+    await this.shareTokenRepository.save(shareToken)
+    this.logger.log(`Share token saved: ${token} for noteId: ${noteId}`)
   }
 }

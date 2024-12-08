@@ -7,12 +7,13 @@ import { Note } from 'entities/note.entity'
 import { NotesService } from 'modules/notes/notes.service'
 import { FolderPermission } from 'entities/folder-permission.entity'
 import { EmailService } from 'modules/email/email.service'
-import { JwtModule, JwtService } from '@nestjs/jwt'
+import { JwtModule } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ShareToken } from 'entities/share-token.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Note, FolderPermission]),
+    TypeOrmModule.forFeature([User, Note, FolderPermission, ShareToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

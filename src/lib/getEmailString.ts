@@ -1,6 +1,6 @@
 import { Note } from 'entities/note.entity'
 
-// Base Email Template Function
+// Base Email Template
 function getBaseEmailTemplate(options: {
   title: string
   content: string
@@ -21,7 +21,7 @@ function getBaseEmailTemplate(options: {
     <body style="font-family: Arial, sans-serif; background-color: #f6f6f4; color: #071015; margin: 0; padding: 20px;">
       <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
         <div style="margin-bottom: 20px;">
-          <img src="https://api.dotmd.ink/logo.png" alt="Logo" width="52" height="24" />
+          <img src="https://api.dotmd.ink/logo2.png" alt="Logo" width="52" height="24" />
           <h1 style="font-size: x-large; margin: 0;">${title}</h1>
         </div>
         <div style="text-align: left; font-size: medium; line-height: 1.5;">
@@ -89,11 +89,11 @@ export function getEmailConfirmationEmail(confirmLink: string): string {
 }
 
 // Get Share Note Internally Email String
-export function getInternalNoteShareEmail(noteTitle: string, noteLink: string): string {
-  const title = 'A dotmd.ink Note Document Has Been Shared with You!'
+export function getInternalNoteShareEmail(noteTitle: string, noteLink: string, name: string): string {
+  const title = `${name} Shared a dotmd.ink Note Document with You!`
   const content = `
     <p>Hello,</p>
-    <p>A <strong><a href="https://dotmd.ink">dotmd.ink</a></strong> user has shared a note titled "<strong>${noteTitle}</strong>" with you.</p>
+    <p>${name} has shared a note titled "<strong>${noteTitle}</strong>" with you.</p>
     <p>Click the button below to view it:</p>
   `
   const buttonText = 'View Note'
@@ -106,15 +106,15 @@ export function getInternalNoteShareEmail(noteTitle: string, noteLink: string): 
 }
 
 // Get Share Note to Non-Existing User Email String
-export function getExternalNoteShareEmail(noteTitle: string, registerLink: string): string {
-  const title = 'A dotmd.ink Note Document Has Been Shared with You!'
+export function getExternalNoteShareEmail(noteTitle: string, shareLink: string, name: string): string {
+  const title = `${name} Shared a dotmd.ink Note Document with You!`
   const content = `
     <p>Hello,</p>
-    <p>A <strong><a href="https://dotmd.ink">dotmd.ink</a></strong> user has shared a note titled "<strong>${noteTitle}</strong>" with you.</p>
+    <p>${name} has shared a note titled "<strong>${noteTitle}</strong>" with you.</p>
     <p>To view the note and sign up, please click below:</p>
   `
   const buttonText = 'View Note'
-  const buttonLink = registerLink
+  const buttonLink = shareLink
   const additionalContent = `
     <p>If you did not expect this, you can safely ignore this email or contact <a href="mailto:support@dotmd.ink">support</a>.</p>
   `

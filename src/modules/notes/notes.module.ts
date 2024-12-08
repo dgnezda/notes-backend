@@ -8,10 +8,11 @@ import { UsersService } from 'modules/users/users.service'
 import { EmailService } from 'modules/email/email.service'
 import { JwtModule } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ShareToken } from 'entities/share-token.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Note, User]),
+    TypeOrmModule.forFeature([Note, User, ShareToken]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

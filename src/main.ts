@@ -15,7 +15,7 @@ async function bootstrap() {
   const logger = new Logger()
 
   app.enableCors({
-    origin: ['http://localhost:54321', 'http://localhost:54322'],
+    origin: ['http://localhost:54321', 'http://localhost:54322', 'http://dotmd.ink', 'https://dotmd.ink'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     credentials: true,
     exposedHeaders: ['Content-Disposition'],
