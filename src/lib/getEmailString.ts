@@ -21,7 +21,7 @@ function getBaseEmailTemplate(options: {
     <body style="font-family: Arial, sans-serif; background-color: #f6f6f4; color: #071015; margin: 0; padding: 20px;">
       <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
         <div style="margin-bottom: 20px;">
-          <img src="https://api.dotmd.ink/files/logo.png" alt="Logo" width="52" height="24" />
+          <img src="https://api.dotmd.ink/logo.png" alt="Logo" width="52" height="24" />
           <h1 style="font-size: x-large; margin: 0;">${title}</h1>
         </div>
         <div style="text-align: left; font-size: medium; line-height: 1.5;">

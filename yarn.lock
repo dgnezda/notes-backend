@@ -343,10 +343,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@css-inline/css-inline-win32-x64-msvc@0.14.1":
+"@css-inline/css-inline-darwin-arm64@0.14.1":
   version "0.14.1"
-  resolved "https://registry.npmjs.org/@css-inline/css-inline-win32-x64-msvc/-/css-inline-win32-x64-msvc-0.14.1.tgz"
-  integrity sha512-nzotGiaiuiQW78EzsiwsHZXbxEt6DiMUFcDJ6dhiliomXxnlaPyBfZb6/FMBgRJOf6sknDt/5695OttNmbMYzg==
+  resolved "https://registry.npmjs.org/@css-inline/css-inline-darwin-arm64/-/css-inline-darwin-arm64-0.14.1.tgz"
+  integrity sha512-QE5W1YRIfRayFrtrcK/wqEaxNaqLULPI0gZB4ArbFRd3d56IycvgBasDTHPre5qL2cXCO3VyPx+80XyHOaVkag==
 
 "@css-inline/css-inline@0.14.1":
   version "0.14.1"
@@ -880,6 +880,13 @@
     comment-json "4.2.5"
     jsonc-parser "3.3.1"
     pluralize "8.0.0"
+
+"@nestjs/serve-static@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.npmjs.org/@nestjs/serve-static/-/serve-static-4.0.2.tgz"
+  integrity sha512-cT0vdWN5ar7jDI2NKbhf4LcwJzU4vS5sVpMkVrHuyLcltbrz6JdGi1TfIMMatP2pNiq5Ie/uUdPSFDVaZX/URQ==
+  dependencies:
+    path-to-regexp "0.2.5"
 
 "@nestjs/swagger@^8.0.5":
   version "8.0.5"
@@ -3004,7 +3011,7 @@ express-session@^1.18.1:
     safe-buffer "5.2.1"
     uid-safe "~2.1.5"
 
-express@4.21.1:
+express@^4.18.1, express@4.21.1:
   version "4.21.1"
   resolved "https://registry.npmjs.org/express/-/express-4.21.1.tgz"
   integrity sha512-YSFlK1Ee0/GC8QaO91tHcDxJiE/X4FbpAyQWkxAvG6AXCuR65YzK8ua6D9hvi/TzUfZMpc+BwuM1IPw8fmQBiQ==
@@ -3290,6 +3297,11 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
+
+fsevents@^2.3.2, fsevents@~2.3.2:
+  version "2.3.3"
+  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
+  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 function-bind@^1.1.2:
   version "1.1.2"
@@ -5220,6 +5232,11 @@ path-to-regexp@0.1.10:
   version "0.1.10"
   resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.10.tgz"
   integrity sha512-7lf7qcQidTku0Gu3YDPc8DJ1q7OOucfa/BSsIwjuh56VU7katFvuM8hULfkwB3Fns/rsVF7PwPKVw1sl5KQS9w==
+
+path-to-regexp@0.2.5:
+  version "0.2.5"
+  resolved "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.2.5.tgz"
+  integrity sha512-l6qtdDPIkmAmzEO6egquYDfqQGPMRNGjYtrU13HAXb3YSRrt7HSb1sJY0pKp6o2bAa86tSB6iwaW2JbthPKr7Q==
 
 path-to-regexp@3.3.0:
   version "3.3.0"

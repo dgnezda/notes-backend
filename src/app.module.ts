@@ -7,9 +7,11 @@ import { configValidationSchema } from './config/schema.config'
 import { LoggerMiddleware } from './middleware/logger.middleware'
 import { EmailModule } from './modules/email/email.module'
 import { DatabaseModule } from 'database/database.module'
-import { FoldersModule } from './modules/folders/folders.module';
-import { GroupsModule } from './modules/groups/groups.module';
-import { FolderPermissionsModule } from './modules/folder-permissions/folder-permissions.module';
+import { FoldersModule } from './modules/folders/folders.module'
+import { GroupsModule } from './modules/groups/groups.module'
+import { FolderPermissionsModule } from './modules/folder-permissions/folder-permissions.module'
+import { join } from 'path'
+import { ServeStaticModule } from '@nestjs/serve-static'
 
 @Module({
   imports: [
@@ -17,6 +19,9 @@ import { FolderPermissionsModule } from './modules/folder-permissions/folder-per
       isGlobal: true,
       envFilePath: [`.env.${process.env.ENV || 'development'}`],
       validationSchema: configValidationSchema,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
     }),
     DatabaseModule,
     NotesModule,
