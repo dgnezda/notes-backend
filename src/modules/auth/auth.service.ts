@@ -24,14 +24,17 @@ export class AuthService {
     this.logger.log('Validating user...')
     const user = await this.usersService.findBy({ email: email })
     if (!user) {
+      this.logger.log(`User with email ${email} does not exist!`)
       throw new BadRequestException('User with this email does not exist.')
     }
     const isPasswordValid = await compareHash(password, user.password)
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials')
+      this.logger.log(`Invalid password for user with email ${email}!`)
+      throw new UnauthorizedException('Invalid password')
     }
 
     if (!user.isEmailConfirmed) {
+      this.logger.log(`User with email ${email} has not confirmed their email address yet!`)
       throw new UnauthorizedException('You need to verify your email before logging in!')
     }
 
@@ -85,6 +88,22 @@ export class AuthService {
 
   async validateUserById(id: string): Promise<User> {
     return this.usersService.findById(id)
+  }
+
+  async sendEmailConfirmation(email: string): Promise<void> {
+    const user = await this.usersService.findBy({ email })
+
+    if (!user) {
+      // For security, you might want to pretend the email was sent
+      throw new BadRequestException('User with this email does not exist.')
+    }
+
+    const emailConfirmToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1d' })
+    const encodedToken = encodeURIComponent(emailConfirmToken)
+    const confirmLink = `${process.env.APP_URL}/auth/confirm-email?token=${encodedToken}`
+
+    const emailContent = getEmailConfirmationEmail(confirmLink)
+    await this.emailService.sendMail(user.email, 'Please confirm your email', emailContent)
   }
 
   async sendPasswordResetEmail(email: string): Promise<void> {

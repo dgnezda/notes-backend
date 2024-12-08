@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { MailerService } from '@nestjs-modules/mailer'
+import { filter } from 'rxjs'
 
 @Injectable()
 export class EmailService {
@@ -16,6 +17,17 @@ export class EmailService {
         subject,
         text: '',
         html,
+        headers: {
+          'X-SMTPAPI': JSON.stringify({
+            filters: {
+              clicktrack: {
+                settings: {
+                  enable: 0,
+                },
+              },
+            },
+          }),
+        },
       })
       this.logger.log(`Email sent to ${to} with subject: ${subject}`)
     } catch (err) {

@@ -12,6 +12,7 @@ import {
   Res,
   Query,
   BadRequestException,
+  Logger,
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger'
@@ -31,6 +32,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto'
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
+  logger: Logger = new Logger(AuthController.name)
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
@@ -77,11 +79,23 @@ export class AuthController {
     return { msg: 'ok' }
   }
 
+  @ApiCreatedResponse({ description: 'Requests email confirmation.' })
+  @ApiBadRequestResponse({ description: 'Error requesting email confirmation.' })
+  @Public()
+  @Post('request-confirm-email')
+  @HttpCode(HttpStatus.OK)
+  async requestConfirmEmail(@Body('email') email: string): Promise<{ message: string }> {
+    await this.authService.sendEmailConfirmation(email)
+    return { message: 'Email confirmation sent.' }
+  }
+
   @ApiCreatedResponse({ description: 'Confirms email.' })
   @ApiBadRequestResponse({ description: 'Error for confirming email.' })
+  @Public()
   @Get('confirm-email')
   @HttpCode(HttpStatus.OK)
   async confirmEmail(@Query('token') token: string): Promise<string> {
+    this.logger.log(`Entered confirmEmail with token: ${token}`)
     try {
       const payload = await this.jwtService.verifyAsync(token)
       const user = await this.usersService.findById(payload.id)
@@ -89,9 +103,8 @@ export class AuthController {
       if (!user) {
         throw new BadRequestException('Invalid token')
       }
-
-      user.isEmailConfirmed = true
-      await this.usersService.update(user.id, user)
+      this.logger.log(`setting user.isEmailConfirmed to true for user with id: ${user.id}`)
+      await this.usersService.update(user.id, { isEmailConfirmed: true })
 
       // Send Welcome Email after email confirmation
       const emailContent = getWelcomeEmail(user.firstName)
