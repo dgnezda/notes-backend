@@ -15,7 +15,15 @@ async function bootstrap() {
   const logger = new Logger()
 
   app.enableCors({
-    origin: ['http://localhost:54321', 'http://localhost:54322', 'http://dotmd.ink', 'https://dotmd.ink'],
+    origin: [
+      'http://localhost:54321',
+      'http://localhost:54322',
+      'http://dotmd.ink',
+      'https://dotmd.ink',
+      'https://notes-app-eosin-psi.vercel.app/login',
+      'http://www.dotmd.ink',
+      'https://www.dotmd.ink',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     credentials: true,
     exposedHeaders: ['Content-Disposition'],
