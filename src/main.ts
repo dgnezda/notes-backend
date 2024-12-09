@@ -20,7 +20,7 @@ async function bootstrap() {
       'http://localhost:54322',
       'http://dotmd.ink',
       'https://dotmd.ink',
-      'https://notes-app-eosin-psi.vercel.app/login',
+      'https://notes-app-eosin-psi.vercel.app',
       'http://www.dotmd.ink',
       'https://www.dotmd.ink',
     ],
