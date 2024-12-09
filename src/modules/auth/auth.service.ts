@@ -113,7 +113,7 @@ export class AuthService {
 
     const emailConfirmToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1d' })
     const encodedToken = encodeURIComponent(emailConfirmToken)
-    const confirmLink = `${process.env.APP_URL}/auth/confirm-email?token=${encodedToken}`
+    const confirmLink = `${process.env.APP_URL}/confirm-email?token=${encodedToken}`
 
     const emailContent = getEmailConfirmationEmail(confirmLink)
     await this.emailService.sendMail(user.email, 'Please confirm your email', emailContent)
@@ -128,7 +128,7 @@ export class AuthService {
     }
 
     const resetToken = this.jwtService.sign({ id: user.id }, { expiresIn: '10m' })
-    const resetLink = `${process.env.APP_URL}/auth/reset-password?token=${resetToken}`
+    const resetLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`
 
     const emailContent = getPasswordResetEmail(resetLink)
     await this.emailService.sendMail(user.email, 'Password Reset Request', emailContent)
