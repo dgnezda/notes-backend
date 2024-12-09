@@ -28,4 +28,8 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @Match(RegisterUserDto, (field) => field.password, { message: 'Passwords do not match.' })
   confirmPassword: string
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  token?: string
 }

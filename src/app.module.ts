@@ -12,6 +12,8 @@ import { GroupsModule } from './modules/groups/groups.module'
 import { FolderPermissionsModule } from './modules/folder-permissions/folder-permissions.module'
 import { join } from 'path'
 import { ServeStaticModule } from '@nestjs/serve-static'
+import { APP_GUARD } from '@nestjs/core'
+import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
 
 @Module({
   imports: [
@@ -33,7 +35,12 @@ import { ServeStaticModule } from '@nestjs/serve-static'
     FolderPermissionsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -21,17 +21,17 @@ function getBaseEmailTemplate(options: {
     <body style="font-family: Arial, sans-serif; background-color: #f6f6f4; color: #071015; margin: 0; padding: 20px;">
       <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
         <div style="margin-bottom: 20px;">
-          <img src="https://api.dotmd.ink/logo2.png" alt="Logo" width="52" height="24" />
-          <h1 style="font-size: x-large; margin: 0;">${title}</h1>
+          <img src="https://api.dotmd.ink/logo2.png" alt="Logo" width="106" height="50" style="margin-bottome: 20px;" />
+          <h1 style="font-size: large; margin-top: 10px;">${title}</h1>
         </div>
-        <div style="text-align: left; font-size: medium; line-height: 1.5;">
+        <div style="text-align: left; font-size: small; line-height: 1.2; margin-left: 12%;">
           ${content}
         </div>
         ${
           buttonText && buttonLink
             ? `
         <div style="margin: 30px 0;">
-          <a href="${buttonLink}" style="display: inline-block; padding: 10px 20px; background-color: #0D0D0D; color: #ffffff !important; text-decoration: none; border-radius: 5px; font-size: medium;">${buttonText}</a>
+          <a href="${buttonLink}" style="display: inline-block; padding: 10px 20px; background-color: #0D0D0D; color: #ffffff !important; text-decoration: none; border-radius: 5px; font-size: small;">${buttonText}</a>
         </div>
         `
             : ''
@@ -39,7 +39,7 @@ function getBaseEmailTemplate(options: {
         ${
           additionalContent
             ? `
-        <div style="text-align: center; font-size: small; color: #555;">
+        <div style="text-align: center; font-size: x-small; color: #555;">
           ${additionalContent}
         </div>
         `

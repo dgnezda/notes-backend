@@ -258,7 +258,10 @@ export class NotesService {
   }
 
   async getSharedNoteByToken(token: string): Promise<Note> {
+    this.logger.log(`Getting shared note by token: ${token}`)
     const shareRecord = await this.getShareToken(token)
+
+    this.logger.log(`Share record found: ${shareRecord.token}`)
 
     if (!shareRecord || shareRecord.expiry < new Date()) {
       throw new NotFoundException('Invalid or expired share token.')

@@ -1,16 +1,16 @@
 export default function getWelcomeNote(): string {
   return `
-    Welcome to .md ink
+    # Welcome to dotmd.ink!
 ========
 
-A short overview of the things you can do with the app:
+### A short overview of the things you can do with the app:
 - quickly add notes with markdown, and see them formatted nicely
 - use snippet buttons (top-middle) for quick insertions of more involved md
 - export and download notes as .md or .pdf files
 
-Hint: click **Edit** to see how this welcome note was formatted! Hope you enjoy my app!
+#### Hint: click **Edit** to see how this welcome note was formatted! Hope you enjoy my app!
 
-Keyboard shortcuts for common tasks:
+### Keyboard shortcuts for common tasks:
 - \`Ctrl + Alt + N\`: Add new note
 - \`Ctrl + Alt + A\`: Save note
 - \`Ctrl + Alt + E\`: Enter/exit edit mode
@@ -19,16 +19,16 @@ Keyboard shortcuts for common tasks:
 - \`Ctrl + Alt + U\`: Toggle pin/unpin selected note
 - and more!
 
-Note: Replace Ctrl + Alt with \`Ctrl + Option\` on **macOS**!  
+#### Note: Replace Ctrl + Alt with \`Ctrl + Option\` on **macOS**!  
 
-You can use most common markdown styling annotations, such as:
+### You can use most common markdown styling annotations, such as:
 
 - headings
-- emphasis
+- **_emphasis_**
 - lists
 - links
 - images
-- code snippets and inline code
+- code snippets and \`inline code\`
 - tables
 - blockquotes
 - horizontal rules

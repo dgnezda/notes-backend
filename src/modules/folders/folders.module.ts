@@ -14,6 +14,7 @@ import { Group } from 'entities/group.entity'
 import { UsersModule } from 'modules/users/users.module'
 import { GroupsModule } from 'modules/groups/groups.module'
 import { NotesModule } from 'modules/notes/notes.module'
+import { JwtService } from '@nestjs/jwt'
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { NotesModule } from 'modules/notes/notes.module'
     NotesModule,
   ],
   controllers: [FoldersController],
-  providers: [FoldersService],
+  providers: [FoldersService, JwtService],
   exports: [FoldersService],
 })
 export class FoldersModule {}

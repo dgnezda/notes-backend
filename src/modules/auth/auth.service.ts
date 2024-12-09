@@ -42,7 +42,9 @@ export class AuthService {
     return user
   }
 
-  async register(registerUserDto: RegisterUserDto, token?: string): Promise<User> {
+  async register(registerUserDto: RegisterUserDto): Promise<User> {
+    const token = registerUserDto.token
+
     const hashedPassword = await hash(registerUserDto.password)
     const user = await this.usersService.create({
       ...registerUserDto,
@@ -58,13 +60,24 @@ export class AuthService {
     // Copy note to user if token is provided
     if (token) {
       try {
-        const payload = await this.jwtService.verifyAsync(token)
-        const noteId = payload['noteId']
+        // Verify and fetch the share token
+        const shareRecord = await this.notesService.getShareToken(token) // ?? GET SHARE RECORD
+
+        if (!shareRecord || shareRecord.expiry < new Date()) {
+          throw new BadRequestException('Invalid or expired share token.')
+        }
+
+        const noteId = shareRecord.noteId
         await this.notesService.copyNoteToUser(noteId, user.id)
+
+        // Optionally delete the share token after use
+        await this.notesService.deleteShareToken(token) // ?? DELETE SHARE TOKEN
+
+        this.logger.log(`Note ${noteId} copied to user ${user.id} upon registration.`)
       } catch (error) {
-        throw new BadRequestException('Invalid token')
+        this.logger.error(`Failed to copy note during registration: ${error.message}`)
+        throw new BadRequestException('Invalid or expired share token.')
       }
-      this.logger.log('Note copied to user')
     }
 
     return user
