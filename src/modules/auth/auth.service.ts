@@ -112,8 +112,8 @@ export class AuthService {
     }
 
     const emailConfirmToken = this.jwtService.sign({ id: user.id }, { expiresIn: '1d' })
-    const encodedToken = encodeURIComponent(emailConfirmToken)
-    const confirmLink = `${process.env.APP_URL}/confirm-email?token=${encodedToken}`
+    // const encodedToken = encodeURIComponent(emailConfirmToken)
+    const confirmLink = `${process.env.APP_URL}/confirm-email?token=${emailConfirmToken}` //encodedToken
 
     const emailContent = getEmailConfirmationEmail(confirmLink)
     await this.emailService.sendMail(user.email, 'Please confirm your email', emailContent)
