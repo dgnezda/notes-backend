@@ -44,7 +44,7 @@ export class UsersService extends AbstractService {
       // Add welcome note to new user
       const welcomeNoteContent: string = getWelcomeNote()
       await this.notesService.createNote(
-        'Welcome to md notes!',
+        'Welcome to dotmd.ink!',
         welcomeNoteContent,
         savedUser.id, // Use the saved user's ID
         true, // isPinned
