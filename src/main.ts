@@ -17,6 +17,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:54321',
+      'https://localhost:54321',
       'http://localhost:54322',
       'http://dotmd.ink',
       'https://dotmd.ink',

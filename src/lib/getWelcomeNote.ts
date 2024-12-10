@@ -1,12 +1,13 @@
 export default function getWelcomeNote(): string {
   return `
-    # Welcome to dotmd.ink!
-========
+# Welcome to dotmd.ink!
 
 ### A short overview of the things you can do with the app:
 - quickly add notes with markdown, and see them formatted nicely
-- use snippet buttons (top-middle) for quick insertions of more involved md
+- use snippet buttons (top-middle) for quick insertions of more involved markdown
 - export and download notes as .md or .pdf files
+- bulk import notes from .md files
+- backup all notes as a .zip file
 
 #### Hint: click **Edit** to see how this welcome note was formatted! Hope you enjoy my app!
 
@@ -17,7 +18,6 @@ export default function getWelcomeNote(): string {
 - \`Ctrl + Alt + P\`: Export as .pdf
 - \`Ctrl + Alt + M\`: Export as .md
 - \`Ctrl + Alt + U\`: Toggle pin/unpin selected note
-- and more!
 
 #### Note: Replace Ctrl + Alt with \`Ctrl + Option\` on **macOS**!  
 
@@ -45,9 +45,10 @@ Examples:
 | -------- | :------: | -------: |
 | Text     | Text     | Text     |
 
-[Link Text](https://google.com)
+[You can add links](https://dotmd.ink)
 
-![Alt Text](https://img.freepik.com/free-photo/close-up-portrait-beautiful-cat_23-2149214419.jpg)
+Or images:
+![Cool cat](https://img.freepik.com/free-photo/close-up-portrait-beautiful-cat_23-2149214419.jpg)
 
 \`\`\`python
 # Your code here with a neat copy to clipboard button on the right =\>
