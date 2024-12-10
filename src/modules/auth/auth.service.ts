@@ -58,27 +58,27 @@ export class AuthService {
     await this.emailService.sendMail(user.email, 'Please confirm your email', emailContent)
 
     // Copy note to user if token is provided
-    // if (token) {
-    //   try {
-    // // Verify and fetch the share token
-    // const shareRecord = await this.notesService.getShareToken(token) // ?? GET SHARE RECORD
+    if (token) {
+      try {
+        // Verify and fetch share token
+        const shareRecord = await this.notesService.getShareRecord(token)
 
-    //   if (!shareRecord || shareRecord.expiry < new Date()) {
-    //     throw new BadRequestException('Invalid or expired share token.')
-    //   }
+        if (!shareRecord || shareRecord.expiry < new Date()) {
+          throw new BadRequestException('Invalid or expired share token.')
+        }
 
-    //   const noteId = shareRecord.noteId
-    //   await this.notesService.copyNoteToUser(noteId, user.id)
+        const noteId = shareRecord.noteId
+        await this.notesService.copyNoteToUser(noteId, user.id)
 
-    //   // Optionally delete the share token after use
-    //   await this.notesService.deleteShareToken(token) // ?? DELETE SHARE TOKEN
+        // Delete share token after use
+        await this.notesService.deleteShareRecord(token)
 
-    //   this.logger.log(`Note ${noteId} copied to user ${user.id} upon registration.`)
-    // } catch (error) {
-    //   this.logger.error(`Failed to copy note during registration: ${error.message}`)
-    //   throw new BadRequestException('Invalid or expired share token.')
-    // }
-    // }
+        this.logger.log(`Note ${noteId} copied to user ${user.id} upon registration.`)
+      } catch (error) {
+        this.logger.error(`Failed to copy note during registration: ${error.message}`)
+        throw new BadRequestException('Invalid or expired share token.')
+      }
+    }
 
     return user
   }

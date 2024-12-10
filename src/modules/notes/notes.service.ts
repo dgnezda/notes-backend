@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
+import { Injectable, NotFoundException, Logger } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { Response } from 'express'
 import { Note } from 'entities/note.entity'
@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt'
 import { getInternalNoteShareEmail, getExternalNoteShareEmail } from 'lib/getEmailString'
 import { EmailService } from 'modules/email/email.service'
 import { v4 as uuidv4 } from 'uuid'
-import { ShareToken } from 'entities/share-token.entity'
+import { ShareRecord } from 'entities/share-record.entity'
 
 @Injectable()
 export class NotesService {
@@ -21,8 +21,8 @@ export class NotesService {
     private noteRepository: Repository<Note>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(ShareToken)
-    private shareTokenRepository: Repository<ShareToken>,
+    @InjectRepository(ShareRecord)
+    private shareRecordRepository: Repository<ShareRecord>,
     private emailService: EmailService,
     private jwtService: JwtService,
   ) {}
@@ -221,12 +221,12 @@ export class NotesService {
           )
         } else {
           // New user
-          const shareToken = uuidv4()
+          const shareRecord = uuidv4()
           const tokenExpiry = new Date()
           tokenExpiry.setDate(tokenExpiry.getDate() + 14) // 14 days
-          await this.saveShareToken(shareToken, noteId, tokenExpiry)
+          await this.saveShareRecord(shareRecord, noteId, tokenExpiry)
 
-          const shareLink = `${process.env.APP_URL}/shared-notes/${shareToken}`
+          const shareLink = `${process.env.APP_URL}/shared-notes/${shareRecord}`
           const emailContent = getExternalNoteShareEmail(note.title, shareLink, note.user.firstName)
 
           this.logger.log(`Note invitation sent to new user ${recipientEmail} at ${shareLink}`)
@@ -259,7 +259,7 @@ export class NotesService {
 
   async getSharedNoteByToken(token: string): Promise<Note> {
     this.logger.log(`Getting shared note by token: ${token}`)
-    const shareRecord = await this.getShareToken(token)
+    const shareRecord = await this.getShareRecord(token)
 
     this.logger.log(`Share record found: ${shareRecord.token}`)
 
@@ -277,26 +277,37 @@ export class NotesService {
     return note
   }
 
-  private async getShareToken(token: string): Promise<ShareToken> {
-    const shareToken = await this.shareTokenRepository.findOne({
+  async getShareRecord(token: string): Promise<ShareRecord> {
+    const shareRecord: ShareRecord = await this.shareRecordRepository.findOne({
       where: { token },
     })
 
-    if (!shareToken) {
+    if (!shareRecord) {
       throw new NotFoundException('Share token not found.')
     }
 
-    return shareToken
+    return shareRecord
   }
 
-  private async saveShareToken(token: string, noteId: string, expiry: Date): Promise<void> {
-    const shareToken = this.shareTokenRepository.create({
+  async saveShareRecord(token: string, noteId: string, expiry: Date): Promise<void> {
+    const shareRecord: ShareRecord = this.shareRecordRepository.create({
       token,
       noteId,
       expiry,
     })
 
-    await this.shareTokenRepository.save(shareToken)
+    await this.shareRecordRepository.save(shareRecord)
     this.logger.log(`Share token saved: ${token} for noteId: ${noteId}`)
+  }
+
+  async deleteShareRecord(token: string): Promise<void> {
+    const shareRecord: ShareRecord = await this.shareRecordRepository.findOne({
+      where: { token },
+    })
+
+    if (shareRecord) {
+      await this.shareRecordRepository.remove(shareRecord)
+      this.logger.log(`Share token deleted: ${token}`)
+    }
   }
 }
