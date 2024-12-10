@@ -27,6 +27,7 @@ import { JwtService } from '@nestjs/jwt'
 import { getWelcomeEmail } from 'lib/getEmailString'
 import { EmailService } from 'modules/email/email.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { ChangePasswordDto } from './dto/change-password.dto'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -134,5 +135,14 @@ export class AuthController {
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
     await this.authService.resetPassword(resetPasswordDto)
     return { message: 'Password has been reset successfully.' }
+  }
+
+  @ApiCreatedResponse({ description: 'Changes password.' })
+  @ApiBadRequestResponse({ description: 'Error changing password.' })
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Body() changePassowordDto: ChangePasswordDto): Promise<{ message: string }> {
+    await this.authService.changePassword(changePassowordDto)
+    return { message: 'Password has been changed successfully.' }
   }
 }

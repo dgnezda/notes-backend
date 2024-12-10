@@ -9,6 +9,7 @@ import { NotesService } from '../notes/notes.service'
 import { getEmailConfirmationEmail, getPasswordResetEmail } from 'lib/getEmailString'
 import { EmailService } from 'modules/email/email.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { ChangePasswordDto } from './dto/change-password.dto'
 
 @Injectable()
 export class AuthService {
@@ -150,5 +151,30 @@ export class AuthService {
     } catch (error) {
       throw new BadRequestException('Invalid or expired token')
     }
+  }
+
+  async changePassword(changePassowordDto: ChangePasswordDto): Promise<void> {
+    const { userId, oldPassword, newPassword, confirmPassword } = changePassowordDto
+    const user = await this.usersService.findById(userId)
+
+    if (!user) {
+      throw new BadRequestException('User not found.')
+    }
+
+    const isPasswordValid = await compareHash(oldPassword, user.password)
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid password')
+    }
+
+    if (oldPassword === newPassword) {
+      throw new BadRequestException('New password cannot be the same as old password.')
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match')
+    }
+
+    user.password = await hash(newPassword)
+    await this.usersService.update(userId, user)
   }
 }

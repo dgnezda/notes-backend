@@ -6,6 +6,10 @@ import { RegisterUserDto } from './register-user.dto'
 export class ChangePasswordDto {
   @ApiProperty({ required: true })
   @IsNotEmpty()
+  userId: string
+
+  @ApiProperty({ required: true })
+  @IsNotEmpty()
   oldPassword: string
 
   @ApiProperty({ required: true })
