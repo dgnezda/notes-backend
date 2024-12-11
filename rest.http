@@ -1,3 +1,24 @@
+### App Version Endpoints
+POST http://localhost:3000/app-version/
+Content-Type: application/json
+{
+  "component": "frontend",
+  "major": 1,
+  "minor": 0,
+  "patch": 0
+}
+
+GET http://localhost:3000/app-version/frontend
+Content-Type: application/json
+
+PUT http://localhost:3000/app-version/frontend
+Content-Type: application/json
+
+{
+  "patch": 1
+}
+
+
 ### Notes Endpoints
 
 # List all notes

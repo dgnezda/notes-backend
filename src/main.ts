@@ -2,10 +2,8 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { Logger, ValidationPipe } from '@nestjs/common'
 import cookieParser from 'cookie-parser'
-import express from 'express'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import passport from 'passport'
-import path from 'path'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,6 +15,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:54321',
+      'http://localhost:54321/change-password',
       'https://localhost:54321',
       'http://localhost:54322',
       'http://dotmd.ink',

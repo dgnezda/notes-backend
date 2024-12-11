@@ -14,6 +14,7 @@ import { join } from 'path'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
+import { AppVersionModule } from './modules/app-version/app-version.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
     FoldersModule,
     GroupsModule,
     FolderPermissionsModule,
+    AppVersionModule,
   ],
   controllers: [],
   providers: [
