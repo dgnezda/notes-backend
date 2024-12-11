@@ -1,22 +1,65 @@
 ### App Version Endpoints
+
+## === GET APP VERSIONS === ##
+
+##   GET FRONTEND VERSION   ##
+GET http://localhost:3000/app-version/frontend
+Content-Type: application/json
+
+##   GET BACKEND VERSION   ##
+GET http://localhost:3000/app-version/backend
+Content-Type: application/json
+
+
+## === UPDATE APP VERSIONS === ##
+
+## ------ FRONTEND ----- ##
+
+## UPDATE MAJOR VERSION ##
+PATCH http://localhost:3000/app-version/frontend/major
+
+## UPDATE MINOR VERSION
+PATCH http://localhost:3000/app-version/frontend/minor
+
+## UPDATE PATCH VERSION
+PATCH http://localhost:3000/app-version/frontend/patch
+
+## --------------------- ##
+
+
+## ------ BACKEND ----- ##
+
+## UPDATE MAJOR VERSION ##
+PATCH http://localhost:3000/app-version/backend/major
+
+## UPDATE MINOR VERSION
+PATCH http://localhost:3000/app-version/backend/minor
+
+## UPDATE PATCH VERSION
+PATCH http://localhost:3000/app-version/backend/patch 
+
+
 POST http://localhost:3000/app-version/
 Content-Type: application/json
 {
-  "component": "frontend",
-  "major": 1,
+  "component": "test",
+  "major": 0,
   "minor": 0,
   "patch": 0
 }
 
+GET http://localhost:3000/app-version/test
+Content-Type: application/json
+
 GET http://localhost:3000/app-version/frontend
 Content-Type: application/json
 
-PUT http://localhost:3000/app-version/frontend
+GET http://localhost:3000/app-version/backend
 Content-Type: application/json
 
-{
-  "patch": 1
-}
+PATCH http://localhost:3000/app-version/test/major
+PATCH http://localhost:3000/app-version/test/minor
+PATCH http://localhost:3000/app-version/test/patch 
 
 
 ### Notes Endpoints

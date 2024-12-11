@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { CreateAppVersionDto } from './dto/create-app-version.dto'
 import { UpdateAppVersionDto } from './dto/update-app-version.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -14,9 +14,11 @@ export class AppVersionService {
     private appVersionRepository: Repository<AppVersion>,
   ) {}
 
-  create(createAppVersionDto: CreateAppVersionDto) {
+  async create(createAppVersionDto: CreateAppVersionDto) {
     // Check if the component already exists
-    const existingComponent = this.appVersionRepository.findOne({ where: { component: createAppVersionDto.component } })
+    const existingComponent = await this.appVersionRepository.findOne({
+      where: { component: createAppVersionDto.component },
+    })
     if (existingComponent) {
       this.logger.log(`Component ${createAppVersionDto.component} already exists!`)
       return
@@ -24,24 +26,38 @@ export class AppVersionService {
     return this.appVersionRepository.save(createAppVersionDto)
   }
 
-  findOne(component: string) {
-    return this.appVersionRepository.findOne({ where: { component } })
+  async findOne(component: string) {
+    const appVersion = await this.appVersionRepository.findOne({ where: { component } })
+    if (!appVersion) {
+      throw new NotFoundException(`AppVersion with component '${component}' not found`)
+    }
+    return appVersion
   }
 
-  async update(component: string, updateAppVersionDto: UpdateAppVersionDto) {
-    const definedFields = Object.fromEntries(
-      Object.entries(updateAppVersionDto).filter(([_, value]) => value !== undefined),
-    )
-    this.logger.log(`Updating app version for component: ${component} to ${JSON.stringify(definedFields)}`)
-
-    // return this.appVersionRepository.update({ component }, definedFields)
-    const result = await this.appVersionRepository.update({ component }, definedFields)
-
-    if (result.affected === 0) {
+  async update(component: string, updateType: 'major' | 'minor' | 'patch'): Promise<AppVersion> {
+    const appVersion = await this.appVersionRepository.findOne({ where: { component } })
+    if (!appVersion) {
       throw new NotFoundException(`AppVersion with component '${component}' not found`)
     }
 
-    return this.appVersionRepository.findOne({ where: { component } })
+    switch (updateType) {
+      case 'major':
+        appVersion.major += 1
+        appVersion.minor = 0
+        appVersion.patch = 0
+        break
+      case 'minor':
+        appVersion.minor += 1
+        appVersion.patch = 0
+        break
+      case 'patch':
+        appVersion.patch += 1
+        break
+      default:
+        throw new BadRequestException(`Invalid update type '${updateType}'`)
+    }
+
+    return this.appVersionRepository.save(appVersion)
   }
 
   remove(id: string) {

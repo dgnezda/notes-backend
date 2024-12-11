@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Put, Patch } from '@nestjs/common'
 import { AppVersionService } from './app-version.service'
 import { CreateAppVersionDto } from './dto/create-app-version.dto'
 import { UpdateAppVersionDto } from './dto/update-app-version.dto'
@@ -19,8 +19,8 @@ export class AppVersionController {
     return this.appVersionService.findOne(component)
   }
 
-  @Put(':component')
-  update(@Param('component') component: string, @Body() updateAppVersionDto: UpdateAppVersionDto) {
-    return this.appVersionService.update(component, updateAppVersionDto)
+  @Patch(':component/:updateType')
+  update(@Param('component') component: string, @Param('updateType') updateType: 'major' | 'minor' | 'patch') {
+    return this.appVersionService.update(component, updateType)
   }
 }
