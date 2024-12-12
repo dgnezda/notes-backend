@@ -174,7 +174,6 @@ export class AuthService {
       throw new BadRequestException('Passwords do not match')
     }
 
-    user.password = await hash(newPassword)
-    await this.usersService.update(userId, user)
+    await this.usersService.update(userId, { password: newPassword, confirmPassword: confirmPassword })
   }
 }

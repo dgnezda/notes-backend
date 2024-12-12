@@ -140,6 +140,7 @@ export class AuthController {
   @ApiCreatedResponse({ description: 'Changes password.' })
   @ApiBadRequestResponse({ description: 'Error changing password.' })
   @Post('change-password')
+  @Public()
   @HttpCode(HttpStatus.OK)
   async changePassword(@Body() changePassowordDto: ChangePasswordDto): Promise<{ message: string }> {
     await this.authService.changePassword(changePassowordDto)

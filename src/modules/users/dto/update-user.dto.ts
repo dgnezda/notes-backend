@@ -21,18 +21,18 @@ export class UpdateUserDto {
   avatar?: string
 
   @ApiProperty({ required: false })
-  @ValidateIf((o) => typeof o.password === 'string' && o.password.length > 0)
+  @ValidateIf((o) => o.password && o.password.length > 0)
   @IsOptional()
-  @Matches(/^(?=.*\d)[A-Za-z.\s_-]+[\w~@#$%^&*+=`|{}:;!.?"()[\]-]{6,}/, {
+  @Matches(/^(?=.*\d)[A-Za-z._-]+[\w~@#$%^&*+=`|{}:;!.?"()[\]-]{7,}/, {
     message:
-      'Password must have at least one number, lower or uppercase letter, and it has to be longer than 5 characters.',
+      'Password must have at least one number, one lowercase, one uppercase letter, one symbol, and it has to at least 8 characters long.',
   })
   password?: string
 
   @ApiProperty({ required: false })
-  @ValidateIf((o) => typeof o.confirm_password === 'string' && o.confirm_password.length > 0)
+  @ValidateIf((o) => o.confirm_password && o.confirm_password.length > 0)
   @IsOptional()
-  @Match(UpdateUserDto, (field) => field.password, { message: 'Passwords do not match.' })
+  @Match(UpdateUserDto, (u) => u.password, { message: 'Passwords do not match.' })
   confirmPassword?: string
 
   @ApiProperty({ required: false })

@@ -58,6 +58,11 @@ export class UsersService extends AbstractService {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = (await this.findById(id)) as User
+
+    if (!user) {
+      throw new BadRequestException(`User with id ${id} not found.`)
+    }
+
     const { email, password, confirmPassword, avatar, ...data } = updateUserDto // role_id
     if (user.email !== email && email) {
       user.email = email
@@ -71,13 +76,26 @@ export class UsersService extends AbstractService {
       }
       user.password = await hash(password)
     }
+
     if (avatar) {
       user.avatar = avatar
     }
     // if (role_id) {
     //   user.role = { ...user.role, id: role_id }
     // }
+    // Object.assign(user, data)
+    // try {
+    //   return await this.usersRepository.save(user)
+    // } catch (err) {
+    //   this.logger.error(err)
+    //   if (err?.code === PostgresErrorCode.UniqueViolation) {
+    //     throw new BadRequestException('User with that email already exists.')
+    //   }
+    //   throw new InternalServerErrorException('Something went wrong while updating the user.')
+    // }
+
     try {
+      this.logger.log('Updating user with data: ', data)
       Object.entries(data).map((entry) => {
         user[entry[0]] = entry[1]
       })
