@@ -6,7 +6,7 @@ import { User } from 'entities/user.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import archiver from 'archiver'
 import slugify from 'slugify'
-import { JwtService } from '@nestjs/jwt'
+// import { JwtService } from '@nestjs/jwt'
 import { getInternalNoteShareEmail, getExternalNoteShareEmail } from 'lib/getEmailString'
 import { EmailService } from 'modules/email/email.service'
 import { v4 as uuidv4 } from 'uuid'
@@ -24,7 +24,7 @@ export class NotesService {
     @InjectRepository(ShareRecord)
     private shareRecordRepository: Repository<ShareRecord>,
     private emailService: EmailService,
-    private jwtService: JwtService,
+    // private jwtService: JwtService,
   ) {}
 
   async listNotes(userId: string): Promise<Note[]> {
@@ -141,7 +141,8 @@ export class NotesService {
     const notes = await this.noteRepository.find({
       where: { user: { id: userId } },
     })
-    const date: string = new Date().toISOString().replace(/[:.]/g, '-')
+    // const date: string = new Date().toISOString().replace(/[:.]/g, '-')
+    const date: string = new Date().toLocaleString()
 
     if (!notes.length) {
       throw new NotFoundException('No notes found to backup!')

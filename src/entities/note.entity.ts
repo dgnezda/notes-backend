@@ -24,4 +24,7 @@ export class Note extends Base {
 
   @Column({ default: false })
   isDeleted: boolean
+
+  @Column({ default: false })
+  isEncrypted: boolean
 }
