@@ -14,7 +14,8 @@ import { join } from 'path'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { APP_GUARD } from '@nestjs/core'
 import { JwtAuthGuard } from 'modules/auth/guards/jwt.guard'
-import { AppVersionModule } from './modules/app-version/app-version.module';
+import { AppVersionModule } from './modules/app-version/app-version.module'
+import { ShareRecordCleanupModule } from 'modules/share-record-cleanup/share-record-cleanup.module'
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AppVersionModule } from './modules/app-version/app-version.module';
     GroupsModule,
     FolderPermissionsModule,
     AppVersionModule,
+    ShareRecordCleanupModule,
   ],
   controllers: [],
   providers: [

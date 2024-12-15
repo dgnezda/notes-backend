@@ -10,4 +10,10 @@ export class ShareRecord {
 
   @Column()
   expiry: Date
+
+  @Column({ nullable: true })
+  senderUserId: string
+
+  @Column({ nullable: true })
+  recipientUserId?: string
 }

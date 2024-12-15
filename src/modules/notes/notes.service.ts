@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common'
+import { Injectable, NotFoundException, Logger, UnauthorizedException } from '@nestjs/common'
 import { Repository } from 'typeorm'
 import { Response } from 'express'
 import { Note } from 'entities/note.entity'
@@ -26,6 +26,78 @@ export class NotesService {
     private emailService: EmailService,
     // private jwtService: JwtService,
   ) {}
+
+  // ====================== //
+  // PRIVATE HELPER METHODS //
+  // ====================== //
+
+  private async handleNoteSharing(note: Note, sender: User, recipientEmail: string): Promise<void> {
+    try {
+      const recipient = await this.userRepository.findOne({ where: { email: recipientEmail } })
+      const token = uuidv4()
+      const tokenExpiry = this.getTokenExpiryDate(14) // 14 days
+
+      const isRecipientRegistered = !!recipient
+      const shareLinkBase = isRecipientRegistered
+        ? `${process.env.APP_URL}/notes/shared`
+        : `${process.env.APP_URL}/notes/public`
+
+      const sharedNoteLink = `${shareLinkBase}/${token}`
+
+      await this.saveShareRecord(token, note.id, tokenExpiry, sender.id, recipient ? recipient.id : undefined)
+
+      if (recipient) {
+        // Existing user
+        await this.ensureUsersAreFriends(sender, recipient)
+        const emailContent = getInternalNoteShareEmail(note.title, sharedNoteLink, sender.firstName)
+        await this.sendShareEmail(
+          recipientEmail,
+          `${sender.firstName} has shared a Note with you via dotmd.ink!`,
+          emailContent,
+        )
+        this.logger.log(`Note shared with registered user ${recipientEmail}: ${sharedNoteLink}`)
+      } else {
+        // New user
+        const emailContent = getExternalNoteShareEmail(note.title, sharedNoteLink, sender.firstName)
+        await this.sendShareEmail(
+          recipientEmail,
+          `${sender.firstName} has invited you to view a note via dotmd.ink!`,
+          emailContent,
+        )
+        this.logger.log(`Note shared with non-registered user ${recipientEmail} at ${sharedNoteLink}`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to share note with ${recipientEmail}: ${error.message}`)
+    }
+  }
+
+  private getTokenExpiryDate(daysValid: number): Date {
+    const expiry = new Date()
+    expiry.setDate(expiry.getDate() + daysValid)
+    return expiry
+  }
+
+  private async ensureUsersAreFriends(sender: User, recipient: User): Promise<void> {
+    const isFriend = await this.userRepository
+      .createQueryBuilder('user')
+      .relation(User, 'friends')
+      .of(sender)
+      .loadMany()
+      .then((friends) => friends.some((friend) => friend.id === recipient.id))
+
+    if (!isFriend) {
+      await this.userRepository.createQueryBuilder().relation(User, 'friends').of(sender).add(recipient.id)
+      await this.userRepository.createQueryBuilder().relation(User, 'friends').of(recipient).add(sender.id)
+    }
+  }
+
+  private async sendShareEmail(recipientEmail: string, subject: string, content: string): Promise<void> {
+    await this.emailService.sendMail(recipientEmail, subject, content)
+  }
+
+  // ====================== //
+  // MAIN NOTE CRUD METHODS //
+  // ====================== //
 
   async listNotes(userId: string): Promise<Note[]> {
     return this.noteRepository.find({
@@ -137,6 +209,10 @@ export class NotesService {
     return note
   }
 
+  // ================= //
+  // BACKUP AND EXPORT //
+  // ================= //
+
   async backupNotes(userId: string, res: Response): Promise<void> {
     const notes = await this.noteRepository.find({
       where: { user: { id: userId } },
@@ -169,6 +245,10 @@ export class NotesService {
     this.logger.log(`Notes backup generated for user: ${userId}`)
   }
 
+  // ================ //
+  // NOTE SHARING API //
+  // ================ //
+
   async shareNote(noteId: string, recipientEmails: string[], userId: string): Promise<void> {
     const note = await this.noteRepository.findOne({
       where: { id: noteId, user: { id: userId } },
@@ -180,103 +260,113 @@ export class NotesService {
 
     const sender = note.user
 
-    const sharePromises = recipientEmails.map(async (recipientEmail) => {
-      try {
-        const recipient: User = await this.userRepository.findOne({
-          where: { email: recipientEmail },
-        })
-
-        if (recipient) {
-          // Check if already friends
-          const isFriend = await this.userRepository
-            .createQueryBuilder('user')
-            .relation(User, 'friends')
-            .of(sender)
-            .loadMany()
-            .then((friends) => friends.some((friend) => friend.id === recipient.id))
-
-          if (!isFriend) {
-            // Add each other as friends without loading full entities
-            await this.userRepository.createQueryBuilder().relation(User, 'friends').of(sender).add(recipient.id)
-
-            await this.userRepository.createQueryBuilder().relation(User, 'friends').of(recipient).add(sender.id)
-          }
-
-          // Share note with existing user
-          const newNote: Note = this.noteRepository.create({
-            ...note,
-            id: undefined, // Ensure a new note is created
-            user: recipient,
-          })
-          await this.noteRepository.save(newNote)
-
-          const sharedNoteLink = `${process.env.APP_URL}/notes/${newNote.id}`
-          this.logger.log(`Note shared with user ${recipientEmail}: ${sharedNoteLink}`)
-
-          const emailContent = getInternalNoteShareEmail(note.title, sharedNoteLink, note.user.firstName)
-
-          await this.emailService.sendMail(
-            recipientEmail,
-            `${note.user.firstName} has shared a Note with you via dotmd.ink!`,
-            emailContent,
-          )
-        } else {
-          // New user
-          const shareRecord = uuidv4()
-          const tokenExpiry = new Date()
-          tokenExpiry.setDate(tokenExpiry.getDate() + 14) // 14 days
-          await this.saveShareRecord(shareRecord, noteId, tokenExpiry)
-
-          const shareLink = `${process.env.APP_URL}/shared-notes/${shareRecord}`
-          const emailContent = getExternalNoteShareEmail(note.title, shareLink, note.user.firstName)
-
-          this.logger.log(`Note invitation sent to new user ${recipientEmail} at ${shareLink}`)
-          await this.emailService.sendMail(
-            recipientEmail,
-            `${note.user.firstName} has invited you to view a note via dotmd.ink!`,
-            emailContent,
-          )
-        }
-      } catch (error) {
-        this.logger.error(`Failed to share note with ${recipientEmail}: ${error.message}`)
-      }
-    })
+    const sharePromises = recipientEmails.map((recipientEmail) => this.handleNoteSharing(note, sender, recipientEmail))
 
     await Promise.allSettled(sharePromises)
   }
 
-  async copyNoteToUser(noteId: string, userId: string): Promise<void> {
-    const note = await this.noteRepository.findOne({ where: { id: noteId } })
-    if (note) {
-      const user = await this.userRepository.findOne({ where: { id: userId } })
-      const newNote = this.noteRepository.create({
-        ...note,
-        id: undefined,
-        user: user,
-      })
-      await this.noteRepository.save(newNote)
-    }
-  }
-
-  async getSharedNoteByToken(token: string): Promise<Note> {
-    this.logger.log(`Getting shared note by token: ${token}`)
+  async copySharedNoteToUser(token: string, userId: string): Promise<void> {
     const shareRecord = await this.getShareRecord(token)
 
-    this.logger.log(`Share record found: ${shareRecord.token}`)
+    if (!shareRecord) {
+      throw new NotFoundException('Share token not found.')
+    }
+
+    if (shareRecord.expiry < new Date()) {
+      // await this.deleteShareRecord(token); // Delete expired share token
+      throw new NotFoundException('Invalid or expired share token.')
+    }
+
+    if (shareRecord.recipientUserId && shareRecord.recipientUserId !== userId) {
+      throw new UnauthorizedException('You are not authorized to copy this note document.')
+    }
+
+    await this.copyNoteToUser(shareRecord.noteId, userId)
+
+    await this.deleteShareRecord(token)
+
+    this.logger.log(`Note copied to user ${userId} and share token ${token} deleted.`)
+  }
+
+  async copyNoteToUser(noteId: string, userId: string): Promise<void> {
+    const note = await this.noteRepository.findOne({ where: { id: noteId } })
+    if (!note) {
+      throw new NotFoundException('Note not found.')
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } })
+    if (!user) {
+      throw new NotFoundException('User not found.')
+    }
+
+    const newNote = this.noteRepository.create({
+      title: note.title,
+      content: note.content,
+      isPinned: note.isPinned,
+      user: user,
+    })
+    await this.noteRepository.save(newNote)
+  }
+
+  // Share note to registered users
+  async getSharedNoteForUser(token: string, userId: string): Promise<Note> {
+    const shareRecord = await this.getShareRecord(token)
 
     if (!shareRecord || shareRecord.expiry < new Date()) {
       throw new NotFoundException('Invalid or expired share token.')
     }
 
-    const note = await this.noteRepository.findOne({
-      where: { id: shareRecord.noteId },
-    })
+    if (shareRecord.recipientUserId !== userId) {
+      throw new UnauthorizedException('You are not authorized to access this note.')
+    }
 
+    const note = await this.noteRepository.findOne({ where: { id: shareRecord.noteId } })
     if (!note) {
       throw new NotFoundException('Note not found.')
     }
+
     return note
   }
+
+  // Share note to non-registered users
+  async getPublicSharedNote(token: string): Promise<Note> {
+    const shareRecord = await this.getShareRecord(token)
+
+    if (!shareRecord || shareRecord.expiry < new Date()) {
+      throw new NotFoundException('Invalid or expired share token.')
+    }
+
+    if (shareRecord.recipientUserId) {
+      throw new UnauthorizedException('This note is not available publicly.')
+    }
+
+    const note = await this.noteRepository.findOne({ where: { id: shareRecord.noteId } })
+    if (!note) {
+      throw new NotFoundException('Note not found.')
+    }
+
+    return note
+  }
+
+  // async getSharedNoteByToken(token: string): Promise<Note> {
+  //   this.logger.log(`Getting shared note by token: ${token}`)
+  //   const shareRecord = await this.getShareRecord(token)
+
+  //   this.logger.log(`Share record found: ${shareRecord.token}`)
+
+  //   if (!shareRecord || shareRecord.expiry < new Date()) {
+  //     throw new NotFoundException('Invalid or expired share token.')
+  //   }
+
+  //   const note = await this.noteRepository.findOne({
+  //     where: { id: shareRecord.noteId },
+  //   })
+
+  //   if (!note) {
+  //     throw new NotFoundException('Note not found.')
+  //   }
+  //   return note
+  // }
 
   async getShareRecord(token: string): Promise<ShareRecord> {
     const shareRecord: ShareRecord = await this.shareRecordRepository.findOne({
@@ -290,11 +380,19 @@ export class NotesService {
     return shareRecord
   }
 
-  async saveShareRecord(token: string, noteId: string, expiry: Date): Promise<void> {
+  async saveShareRecord(
+    token: string,
+    noteId: string,
+    expiry: Date,
+    senderUserId: string,
+    recipientUserId?: string,
+  ): Promise<void> {
     const shareRecord: ShareRecord = this.shareRecordRepository.create({
       token,
       noteId,
       expiry,
+      senderUserId,
+      recipientUserId,
     })
 
     await this.shareRecordRepository.save(shareRecord)

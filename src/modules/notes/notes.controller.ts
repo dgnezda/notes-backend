@@ -94,9 +94,22 @@ export class NotesController {
     return this.notesService.shareNote(id, emails, userId)
   }
 
+  @Get('shared/:token')
+  async getSharedNoteForUser(@Param('token') token: string, @Req() req: Request): Promise<Note> {
+    const userId = req.user['id']
+    return this.notesService.getSharedNoteForUser(token, userId)
+  }
+
   @Public()
-  @Get('share/:token')
-  async getSharedNote(@Param('token') token: string): Promise<Note> {
-    return this.notesService.getSharedNoteByToken(token)
+  @Get('public/:token')
+  async getPublicSharedNote(@Param('token') token: string): Promise<Note> {
+    return this.notesService.getPublicSharedNote(token)
+  }
+
+  // @Public()
+  @Post('share/:token/copy')
+  async copySharedNoteToUser(@Param('token') token: string, @Req() req: Request): Promise<void> {
+    const userId = req.user['id']
+    return this.notesService.copySharedNoteToUser(token, userId)
   }
 }

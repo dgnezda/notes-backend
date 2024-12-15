@@ -89,7 +89,7 @@ export function getEmailConfirmationEmail(confirmLink: string): string {
 }
 
 // Get Share Note Internally Email String
-export function getInternalNoteShareEmail(noteTitle: string, noteLink: string, name: string): string {
+export function getInternalNoteShareEmail(noteTitle: string, shareLink: string, name: string): string {
   const title = `${name} Shared a dotmd.ink Note Document with You!`
   const content = `
     <p>Hello,</p>
@@ -97,9 +97,9 @@ export function getInternalNoteShareEmail(noteTitle: string, noteLink: string, n
     <p>Click the button below to view it:</p>
   `
   const buttonText = 'View Note'
-  const buttonLink = noteLink
+  const buttonLink = shareLink
   const additionalContent = `
-    <p>If you have any questions, please contact <a href="mailto:support@dotmd.ink">support</a>.</p>
+    <p>If you did not expect this, you can safely ignore this email or contact <a href="mailto:support@dotmd.ink">support</a>.</p>
   `
 
   return getBaseEmailTemplate({ title, content, buttonText, buttonLink, additionalContent })
