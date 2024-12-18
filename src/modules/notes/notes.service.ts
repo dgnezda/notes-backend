@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, Logger, UnauthorizedException } from '@nestjs/common'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 import { Response } from 'express'
 import { Note } from 'entities/note.entity'
 import { User } from 'entities/user.entity'
@@ -193,6 +193,19 @@ export class NotesService {
 
     await this.noteRepository.remove(note)
     this.logger.log(`Note deleted: ${id}`)
+  }
+
+  async deleteNotesBulk(userId: string): Promise<void> {
+    const result = await this.noteRepository.delete({
+      user: { id: userId },
+      isDeleted: true,
+    })
+
+    if (result.affected && result.affected > 0) {
+      this.logger.log(`Bulk notes deleted: ${result.affected} notes`)
+    } else {
+      this.logger.warn('No notes marked as deleted found to delete.')
+    }
   }
 
   async pinNote(id: string, isPinned: boolean, userId: string): Promise<Note> {

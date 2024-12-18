@@ -66,6 +66,12 @@ export class NotesController {
     return this.notesService.createNotesBulk(userId, notesData)
   }
 
+  @Delete('trash')
+  async emptyTrash(@Req() req: Request): Promise<void> {
+    const userId = req.user['id']
+    return this.notesService.deleteNotesBulk(userId)
+  }
+
   @Put(':id')
   async updateNote(
     @Param('id') id: string,

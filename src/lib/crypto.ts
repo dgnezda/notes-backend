@@ -10,7 +10,7 @@ async function deriveKey(password: string, salt: string): Promise<Buffer> {
 
 export async function encrypt(text: string, userId: string): Promise<string> {
   const iv = randomBytes(IV_LENGTH)
-  const key = await deriveKey(ENCRYPTION_KEY, userId) // userId as unique salt
+  const key = await deriveKey(ENCRYPTION_KEY, userId)
   const cipher = createCipheriv('aes-256-cbc', key, iv)
 
   const encrypted = Buffer.concat([cipher.update(text), cipher.final()])
@@ -25,7 +25,7 @@ export async function decrypt(encryptedText: string, userId: string): Promise<st
 
   const iv = Buffer.from(ivHex, 'hex')
   const encrypted = Buffer.from(encryptedHex, 'hex')
-  const key = await deriveKey(ENCRYPTION_KEY, userId) // same userId as salt to decrypt
+  const key = await deriveKey(ENCRYPTION_KEY, userId)
 
   const decipher = createDecipheriv('aes-256-cbc', key, iv)
   const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()])

@@ -104,12 +104,10 @@ export class AuthController {
       if (!user) {
         throw new BadRequestException('Invalid token')
       }
-      this.logger.log(`setting user.isEmailConfirmed to true for user with id: ${user.id}`)
       await this.usersService.update(user.id, { isEmailConfirmed: true })
 
-      // Send Welcome Email after email confirmation
       const emailContent = getWelcomeEmail(user.firstName)
-      await this.emailService.sendMail(user.email, 'Welcome to .md notes!', emailContent)
+      await this.emailService.sendMail(user.email, 'Welcome to dotmd.ink!', emailContent)
 
       return 'Email confirmed successfully'
     } catch (error) {

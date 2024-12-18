@@ -9,7 +9,7 @@ export default function getWelcomeNote(): string {
 - bulk import notes from .md files
 - backup all notes as a .zip file
 
-#### Hint: click **Edit** to see how this welcome note was formatted! Hope you enjoy my app!
+> Hint: You can click the **Edit** button on this note to see how it was formatted!  
 
 ### Keyboard shortcuts for common tasks:
 - \`Ctrl + Alt + N\`: Add new note
