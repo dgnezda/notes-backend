@@ -5,11 +5,15 @@ import { Repository } from 'typeorm'
 import { Cron } from '@nestjs/schedule'
 
 @Injectable()
-export class ShareRecordCleanupService {
+export class ShareRecordService {
   constructor(
     @InjectRepository(ShareRecord)
     private shareRecordRepository: Repository<ShareRecord>,
   ) {}
+
+  async getShareRecord(token: string): Promise<ShareRecord> {
+    return this.shareRecordRepository.findOne({ where: { token } })
+  }
 
   // Remove expired share records every day at midnight
   @Cron('0 0 * * *')
