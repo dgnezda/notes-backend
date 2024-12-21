@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common'
 import cookieParser from 'cookie-parser'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import passport from 'passport'
+import bodyParser from 'body-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -31,6 +32,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe())
   app.use(cookieParser())
   app.use(passport.initialize())
+  app.use(bodyParser.json({ limit: '50mb' }))
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
   // Setup to display files
   // app.use('/files', express.static(path.join(__dirname, '..', 'files')))
 
