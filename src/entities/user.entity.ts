@@ -3,9 +3,9 @@ import { Base } from './base.entity'
 import { Exclude } from 'class-transformer'
 import { Note } from './note.entity'
 import { Group } from './group.entity'
-import { UserFolder } from './user-folder.entity'
 import { FolderPermission } from './folder-permission.entity'
 import { ApiProperty } from '@nestjs/swagger'
+import { Folder } from './folder.entity'
 
 @Entity()
 export class User extends Base {
@@ -38,9 +38,9 @@ export class User extends Base {
   })
   groups: Group[]
 
-  @ApiProperty({ type: UserFolder, isArray: true })
-  @OneToMany(() => UserFolder, (folder) => folder.user)
-  folders: UserFolder[]
+  @ApiProperty({ type: Folder, isArray: true })
+  @OneToMany(() => Folder, (folder) => folder.owner)
+  folders: Folder[]
 
   @ApiProperty({ type: Group, isArray: true })
   @OneToMany(() => Group, (group) => group.admin, { nullable: true })

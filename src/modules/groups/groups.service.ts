@@ -6,8 +6,7 @@ import { Repository } from 'typeorm'
 import { CreateGroupDto } from './dto/create-group.dto'
 import { AddUserToGroupDto } from './dto/add-user-to-group.dto'
 import { AssignFolderToGroupDto } from './dto/assign-folder-to-group.dto'
-import { GroupFolder } from 'entities/group-folder.entity'
-import { UserFolder } from 'entities/user-folder.entity'
+import { Folder } from 'entities/folder.entity'
 
 @Injectable()
 export class GroupsService {
@@ -16,10 +15,8 @@ export class GroupsService {
     private readonly groupRepository: Repository<Group>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(GroupFolder)
-    private readonly groupFolderRepository: Repository<GroupFolder>,
-    @InjectRepository(UserFolder)
-    private readonly userFolderRepository: Repository<UserFolder>,
+    @InjectRepository(Folder)
+    private readonly folderRepository: Repository<Folder>,
   ) {}
 
   async createGroup(createGroupDto: CreateGroupDto, adminId: string): Promise<Group> {
@@ -72,7 +69,7 @@ export class GroupsService {
     groupId: string,
     adminId: string,
     assignFolderDto: AssignFolderToGroupDto,
-  ): Promise<GroupFolder> {
+  ): Promise<Folder> {
     const group = await this.groupRepository.findOne({
       where: { id: groupId },
       relations: ['admin'],
@@ -85,19 +82,15 @@ export class GroupsService {
       throw new ForbiddenException(`Only the group admin can assign folders`)
     }
 
-    const userFolder = await this.userFolderRepository.findOne({
+    const folder = await this.folderRepository.findOne({
       where: { id: assignFolderDto.folderId },
     })
-    if (!userFolder) {
+    if (!folder) {
       throw new NotFoundException(`Folder not found`)
     }
 
-    const groupFolder = this.groupFolderRepository.create({
-      name: userFolder.name,
-      group,
-      // Copy other necessary properties
-    })
+    folder.group = group
 
-    return this.groupFolderRepository.save(groupFolder)
+    return this.folderRepository.save(folder)
   }
 }

@@ -4,12 +4,11 @@ import { GroupsController } from './groups.controller'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Group } from 'entities/group.entity'
 import { User } from 'entities/user.entity'
-import { GroupFolder } from 'entities/group-folder.entity'
-import { UserFolder } from 'entities/user-folder.entity'
 import { JwtService } from '@nestjs/jwt'
+import { Folder } from 'entities/folder.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group, User, GroupFolder, UserFolder])],
+  imports: [TypeOrmModule.forFeature([Group, User, Folder])],
   controllers: [GroupsController],
   providers: [GroupsService, JwtService],
   exports: [GroupsService],

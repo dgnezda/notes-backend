@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { UserFolder } from 'entities/user-folder.entity'
 import { User } from 'entities/user.entity'
 import { Repository } from 'typeorm'
 import { CreateFolderDto } from './dto/create-folder.dto'
@@ -8,19 +7,20 @@ import { UpdateFolderDto } from './dto/update-folder.dto'
 import { FolderPermission } from 'entities/folder-permission.entity'
 import { ShareFolderDto } from './dto/share-folder.dto'
 import { PermissionsEnum } from 'enums/permissions.enum'
+import { Folder } from 'entities/folder.entity'
 
 @Injectable()
 export class FoldersService {
   constructor(
-    @InjectRepository(UserFolder)
-    private readonly folderRepository: Repository<UserFolder>,
+    @InjectRepository(Folder)
+    private readonly folderRepository: Repository<Folder>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(FolderPermission)
     private readonly folderPermissionRepository: Repository<FolderPermission>,
   ) {}
 
-  async createFolder(createFolderDto: CreateFolderDto, userId: string): Promise<UserFolder> {
+  async createFolder(createFolderDto: CreateFolderDto, userId: string): Promise<Folder> {
     const user = await this.userRepository.findOne({ where: { id: userId } })
     if (!user) {
       throw new NotFoundException(`User not found`)
@@ -28,7 +28,10 @@ export class FoldersService {
 
     const folder = this.folderRepository.create({
       name: createFolderDto.name,
-      user: { id: userId },
+      owner: { id: userId },
+      notes: [],
+      group: null,
+      folderPermissions: [],
     })
 
     const savedFolder = await this.folderRepository.save(folder)
@@ -44,14 +47,14 @@ export class FoldersService {
     return savedFolder
   }
 
-  async findAll(userId: string): Promise<UserFolder[]> {
+  async findAll(userId: string): Promise<Folder[]> {
     return this.folderRepository.find({
-      where: { user: { id: userId } },
+      where: { owner: { id: userId } },
       relations: ['user'],
     })
   }
 
-  async findOne(id: string, userId: string): Promise<UserFolder> {
+  async findOne(id: string, userId: string): Promise<Folder> {
     const folder = await this.folderRepository.findOne({
       where: { id },
       relations: ['user'],
@@ -59,13 +62,13 @@ export class FoldersService {
     if (!folder) {
       throw new NotFoundException(`Folder not found`)
     }
-    if (folder.user.id !== userId) {
+    if (folder.owner.id !== userId) {
       throw new ForbiddenException(`You do not have access to this folder`)
     }
     return folder
   }
 
-  async update(id: string, userId: string, updateFolderDto: UpdateFolderDto): Promise<UserFolder> {
+  async update(id: string, userId: string, updateFolderDto: UpdateFolderDto): Promise<Folder> {
     const folder = await this.findOne(id, userId)
 
     Object.assign(folder, updateFolderDto)

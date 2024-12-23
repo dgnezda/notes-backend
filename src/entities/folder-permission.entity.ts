@@ -3,13 +3,13 @@ import { User } from './user.entity'
 import { PermissionsEnum } from '../enums/permissions.enum'
 import { Base } from './base.entity'
 import { ApiProperty } from '@nestjs/swagger'
-import { BaseFolder } from './base-folder.entity'
+import { Folder } from './folder.entity'
 
 @Entity()
 export class FolderPermission extends Base {
-  @ManyToOne(() => BaseFolder, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Folder, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'folderId' })
-  folder: BaseFolder
+  folder: Folder
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })

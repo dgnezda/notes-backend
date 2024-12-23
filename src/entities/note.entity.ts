@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
 import { Base } from './base.entity'
 import { User } from './user.entity'
-import { BaseFolder } from './base-folder.entity'
+import { Folder } from './folder.entity'
 
 @Entity()
 export class Note extends Base {
@@ -18,9 +18,9 @@ export class Note extends Base {
   @JoinColumn({ name: 'userId' })
   user: User
 
-  @ManyToOne(() => BaseFolder, (folder) => folder.notes, { nullable: true })
+  @ManyToOne(() => Folder, (folder) => folder.notes, { nullable: true })
   @JoinColumn({ name: 'folderId' })
-  folder: BaseFolder
+  folder: Folder
 
   @Column({ default: false })
   isDeleted: boolean
