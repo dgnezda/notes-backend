@@ -1,29 +1,33 @@
 export enum PermissionsEnum {
   NONE = 0,
-  ALL = 1 << 0,
 
-  VIEW_NOTES = 1 << 1,
-  VIEW_PERMISSIONS = 1 << 2,
-  VIEW_CHANGELOG = 1 << 3,
-  VIEW_USERS = 1 << 4,
-  VIEW_PINNED = 1 << 5,
-  VIEW_TRASH = 1 << 6,
+  /*
+   * NOTE_VIEW - user can view notes
+   */
+  NOTE_VIEW = 1 << 0,
 
-  GROUP_FOLDER_ADD = 1 << 7,
-  GROUP_NOTE_ADD = 1 << 8,
-  GROUP_USER_INVITE = 1 << 9,
-  GROUP_USER_REMOVE = 1 << 10,
+  /*
+   * NOTE_EDIT - user can create & update notes (but not delete)
+   */
+  NOTE_EDIT = 1 << 1,
 
-  NOTE_PERMISSIONS = 1 << 11,
-  NOTE_RENAME = 1 << 12,
-  NOTE_DELETE = 1 << 13,
-  NOTE_MOVE = 1 << 14,
-  NOTE_COPY = 1 << 15,
-  NOTE_SEARCH = 1 << 16,
-  NOTE_DOWNLOAD = 1 << 17,
-  NOTE_UPDATE = 1 << 18,
-  NOTE_DOWNLOAD_BULK = 1 << 19,
-  NOTE_PERMANENT_DELETE = 1 << 20,
+  /*
+   * NOTE_DELETE - user can delete notes
+   * (restricted to admin in your scenario)
+   */
+  NOTE_DELETE = 1 << 2,
+
+  /*
+   * FOLDER_MANAGE - user can create, rename, delete folders
+   * (restricted to admin in your scenario)
+   */
+  FOLDER_MANAGE = 1 << 3,
+
+  /*
+   * GROUP_MANAGE - user can invite/remove users,
+   * promote/demote others to admin
+   */
+  GROUP_MANAGE = 1 << 4,
 }
 
 // NONE                        = 0,

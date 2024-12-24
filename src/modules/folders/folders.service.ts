@@ -36,11 +36,15 @@ export class FoldersService {
 
     const savedFolder = await this.folderRepository.save(folder)
 
-    // Assign full permissions to the creator
     const folderPermission = this.folderPermissionRepository.create({
       folder: savedFolder,
       user: user,
-      permissions: PermissionsEnum.ALL, // Assuming ALL represents full permissions
+      permissions:
+        PermissionsEnum.NOTE_VIEW |
+        PermissionsEnum.NOTE_EDIT |
+        PermissionsEnum.NOTE_DELETE |
+        PermissionsEnum.FOLDER_MANAGE |
+        PermissionsEnum.GROUP_MANAGE, // full permissions
     })
     await this.folderPermissionRepository.save(folderPermission)
 
